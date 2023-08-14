@@ -35,8 +35,7 @@ export async function extractFormInformation(element) {
             element,
         };
     }
-    if(!form.checkValidity())
-    {
+    if(!form.checkValidity()) {
         form.reportValidity();
     }
     return formData;
@@ -46,7 +45,6 @@ async function imageUpload(file) {
     let base64String = "";
     let reader = new FileReader();
 
-
     return await new Promise((resolve,reject)=>{
         reader.onload = function () {
             base64String = reader.result;
@@ -54,18 +52,13 @@ async function imageUpload(file) {
         }
         reader.readAsDataURL(file);
     })
-
 }
 
-export function checkValidityFormInfo(formInfo)
-{
-  if(!formInfo.isValid)
-  {
+export function checkValidityFormInfo(formInfo) {
+  if(!formInfo.isValid) {
       let entries=Object.entries(formInfo.elements)
-      for(const entry of entries)
-      {
-         if(!entry[1].isValid)
-         {
+      for(const entry of entries) {
+         if(!entry[1].isValid) {
              let input=document.querySelector("#"+entry[1].element.getAttribute("data-id"));
              //console.log(input);
 

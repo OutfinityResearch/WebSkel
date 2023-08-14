@@ -12,6 +12,23 @@ export function getClosestParentElement(element, selector, stopSelector) {
     return closestParent;
 }
 
+export function sanitize(string) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        "/": '&#x2F;',
+        '`': '&#x60;',
+        '=': '&#x3D;'
+    };
+    const reg = /[&<>"'/]/ig;
+    return string.replace(reg, (match)=>(map[match]));
+}
+
 export function getMainAppContainer(element) {
     return getClosestParentElement(element, ".app-container");
 }
+
+
