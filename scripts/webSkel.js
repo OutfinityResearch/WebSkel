@@ -151,7 +151,7 @@ class WebSkel {
     }
 
     defineComponent = async (componentName, templatePath) => {
-        let template = await (await fetch(getAppUrl(templatePath))).text();
+        let template = await (await fetch(templatePath)).text();
         customElements.define(
             componentName,
             class extends HTMLElement {
