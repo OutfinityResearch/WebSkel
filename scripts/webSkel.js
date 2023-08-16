@@ -75,7 +75,7 @@ class WebSkel {
     }
 
     setDomElementForPages(elem) {
-        this._appContent.innerHTML = elem;
+        this._appContent = elem;
     }
 
     updateAppContent(content) {
