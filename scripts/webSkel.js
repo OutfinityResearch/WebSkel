@@ -52,7 +52,7 @@ class WebSkel {
     async changeToStaticPage(pageUrl, skipHistoryState) {
         const loading= await this.showLoading();
         try {
-            const pageContent = this.fetchTextResult(pageUrl, skipHistoryState);
+            const pageContent = await this.fetchTextResult(pageUrl, skipHistoryState);
              this.updateAppContent(pageContent);
         } catch (error) {
             console.log("Failed to change page", error);
