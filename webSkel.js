@@ -33,18 +33,26 @@ class WebSkel {
     }
 
     async changeToDynamicPage(pageHtmlTagName, skipHistoryState) {
-        let result = `<${pageHtmlTagName} data-presenter="${pageHtmlTagName}"></${pageHtmlTagName}>`;
-        if (!skipHistoryState) {
-            const path = "#" + pageHtmlTagName; // leave baseUrl for now
-            window.history.pushState({ pageHtmlTagName, relativeUrlContent: result }, path.toString(), path);
+        const loading= await this.showLoading();
+        try {
+            let result = `<${pageHtmlTagName} data-presenter="${pageHtmlTagName}"></${pageHtmlTagName}>`;
+            if (!skipHistoryState) {
+                const path = "#" + pageHtmlTagName; // leave baseUrl for now
+                window.history.pushState({pageHtmlTagName, relativeUrlContent: result}, path.toString(), path);
+            }
+            this.updateAppContent(result);
+        } catch (error) {
+            console.log("Failed to change page", error);
+        } finally {
+            loading.close();
+            loading.remove();
         }
-        this.updateAppContent(result);
     }
 
     async changeToStaticPage(pageUrl, skipHistoryState) {
         const loading= await this.showLoading();
         try {
-            const pageContent = this.fetchTextResult(pageUrl, skipHistoryState);
+            const pageContent = await this.fetchTextResult(pageUrl, skipHistoryState);
              this.updateAppContent(pageContent);
         } catch (error) {
             console.log("Failed to change page", error);
@@ -135,7 +143,7 @@ class WebSkel {
         if(relativeUrlPath.startsWith("#")) {
             relativeUrlPath=relativeUrlPath.slice(1);
         }
-        const response = await fetch(appBaseUrl + '/' + relativeUrlPath);
+        const response = await fetch(appBaseUrl + relativeUrlPath);
         if (!response.ok) {
             throw new Error("Failed to execute request");
         }
