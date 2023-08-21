@@ -14,10 +14,10 @@ class WebSkel {
         this.presentersRegistry[name] = instance;
     }
 
-    initialisePresenter(presenterName) {
+    initialisePresenter(presenterName, component) {
         let presenter;
         try {
-            presenter = new this.presentersRegistry[presenterName];
+            presenter = new this.presentersRegistry[presenterName](component);
         } catch(e) {
             console.error(`No presenter ${presenterName} found.`);
         }
@@ -181,7 +181,7 @@ class WebSkel {
                             self.variables[attr.nodeName] = attr.nodeValue;
                         }
                         if(attr.name === "data-presenter") {
-                            self.presenter = window.webSkel.initialisePresenter(attr.nodeValue);
+                            self.presenter = window.webSkel.initialisePresenter(attr.nodeValue,self);
                             self.presenter.invalidate = () => {
                                 self.presenter.beforeRender();
                                 for(let vn in self.variables) {
@@ -190,6 +190,7 @@ class WebSkel {
                                     }
                                 }
                                 self.refresh();
+                                self.presenter.afterRender();
                             }
                         }
                     });
