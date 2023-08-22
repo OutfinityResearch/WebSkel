@@ -200,15 +200,11 @@ class WebSkel {
                 }
 
                 refresh() {
-                    let contentArray = this.templateArray.map((item) => {
-                        if(item.startsWith("$$")) {
-                            let varName = item.slice(2);
-                            return this.variables[varName];
-                        }
-                        return item;
-                    });
-
-                    this.innerHTML = contentArray.join("");
+                    let stringHTML="";
+                    for(let item of this.templateArray){
+                        item.startsWith("$$")?stringHTML+=this.variables[item.slice(2)]:stringHTML+=item;
+                    }
+                    this.innerHTML = stringHTML;
                 }
             }
         );
