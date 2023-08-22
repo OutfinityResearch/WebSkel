@@ -34,9 +34,27 @@ export function closeModal(element) {
     }
 }
 
-export function showActionBox(primaryKey) {
-    let showBox= document.getElementById(primaryKey);
-    if(showBox.style.display==="none" || showBox.style.display==="") {
-        showBox.style.display = "block";
+export function showActionBox(targetElement,primaryKey,componentName,insertionMode) {
+    const existingComponentNode = document.getElementById(`${primaryKey}`);
+    if (existingComponentNode) {
+        return;
     }
+    const componentNode=document.createElement(`${componentName}`);
+    /* We could use the id of the parent element instead - TBD */
+    componentNode.setAttribute("id",`${primaryKey}`);
+
+    switch (insertionMode){
+        case "prepend":
+            targetElement.insertBefore(componentNode,targetElement.firstChild);
+            break;
+        case "append":
+            targetElement.appendChild(componentNode);
+            break;
+        default: console.error("Invalid Insertion Mode");
+    }
+    document.addEventListener('click', (event) => {
+        if (!componentNode.contains(event.target)) {
+            componentNode.remove();
+        }
+    });
 }
