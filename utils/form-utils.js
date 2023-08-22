@@ -20,7 +20,12 @@ export async function extractFormInformation(element) {
 
         if(element.getAttribute("type")==="file")
         {
-            formData.data[element.name] = await imageUpload(element.files[0]);
+            try {
+                formData.data[element.name] = await imageUpload(element.files[0]);
+            }
+            catch (err){
+                console.log(err);
+            }
         }
         let isValid = false;
         if (typeof element.checkValidity === "function") {
@@ -50,7 +55,10 @@ async function imageUpload(file) {
             base64String = reader.result;
             resolve(base64String);
         }
-        reader.readAsDataURL(file);
+        if(file){
+            reader.readAsDataURL(file);
+        }
+        else {reject("No file given as input at imageUpload");}
     })
 }
 
