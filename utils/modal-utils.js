@@ -34,31 +34,68 @@ export function closeModal(element) {
     }
 }
 
-export function showActionBox(targetElement,primaryKey,componentName,insertionMode) {
+export async function showActionBox(targetElement, primaryKey, componentName, insertionMode) {
     const existingComponentNode = document.getElementById(`${primaryKey}`);
     if (existingComponentNode) {
         return;
     }
-    const componentNode=document.createElement(`${componentName}`);
+    const componentNode = document.createElement(`${componentName}`);
     /* We could use the id of the parent element instead and remove it here - TBD */
-    componentNode.setAttribute("id",primaryKey);
+    componentNode.setAttribute("id", primaryKey);
 
-    switch (insertionMode){
-        case "prepend":
-            targetElement.insertBefore(componentNode,targetElement.firstChild);
-            break;
-        case "append":
-            targetElement.appendChild(componentNode);
-            break;
-        case "replace":
-            targetElement.innerHTML = '';
-            targetElement.appendChild(componentNode);
-            break;
-        default: console.error(`Invalid Insertion Mode:${insertionMode}`);
-    }
-    document.addEventListener('click', (event) => {
-        if (componentNode && !componentNode.contains(event.target)) {
+    let oldComponentNode;
+
+    const removeComponent = () => {
+        if (componentNode) {
             componentNode.remove();
+            document.removeEventListener('click', clickHandler);
         }
-    });
+    };
+
+    switch (insertionMode) {
+        case "prepend":
+            targetElement.parentNode.insertBefore(componentNode, targetElement);
+            break;
+
+        case "append":
+            targetElement.parentNode.appendChild(componentNode);
+            break;
+
+        case "replace":
+            oldComponentNode = targetElement;
+            const parentNode = oldComponentNode.parentNode;
+            parentNode.removeChild(oldComponentNode);
+            parentNode.appendChild(componentNode);
+            break;
+
+        case "replace-all":
+            oldComponentNode = targetElement.parentNode;
+            const parentElement = oldComponentNode;
+            oldComponentNode = parentElement.innerHTML;
+            parentElement.innerHTML = '';
+            parentElement.appendChild(componentNode);
+            break;
+
+        default:
+            console.error(`Invalid Insertion Mode: ${insertionMode}. No changes to the DOM have been made`);
+            return;
+    }
+
+    let clickHandler = (event) => {
+        if (componentNode && !componentNode.contains(event.target)) {
+            if (insertionMode === "replace" && oldComponentNode) {
+                const parentNode = componentNode.parentNode;
+                parentNode.removeChild(componentNode);
+                parentNode.appendChild(oldComponentNode);
+            }
+            else if (insertionMode === "replace-all" && oldComponentNode) {
+                const parentElement = componentNode.parentNode;
+                parentElement.innerHTML = oldComponentNode;
+            }
+            removeComponent();
+        }
+    };
+
+    document.addEventListener('click', clickHandler);
 }
+
