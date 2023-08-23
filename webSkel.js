@@ -190,7 +190,7 @@ class WebSkel {
                                     }
                                 }
                                 self.refresh();
-                                self.presenter.afterRender();
+                                self.presenter.afterRender?.();
                             }
                         }
                     });
