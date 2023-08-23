@@ -18,8 +18,7 @@ export async function extractFormInformation(element) {
         const value = element.tagName === "CHECKBOX" ? element.checked : element.value;
         formData.data[element.name] = value;
 
-        if(element.getAttribute("type")==="file")
-        {
+        if(element.getAttribute("type")==="file") {
             try {
                 formData.data[element.name] = await imageUpload(element.files[0]);
             }

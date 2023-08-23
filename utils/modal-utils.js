@@ -40,8 +40,8 @@ export function showActionBox(targetElement,primaryKey,componentName,insertionMo
         return;
     }
     const componentNode=document.createElement(`${componentName}`);
-    /* We could use the id of the parent element instead - TBD */
-    componentNode.setAttribute("id",`${primaryKey}`);
+    /* We could use the id of the parent element instead and remove it here - TBD */
+    componentNode.setAttribute("id",primaryKey);
 
     switch (insertionMode){
         case "prepend":
@@ -50,10 +50,14 @@ export function showActionBox(targetElement,primaryKey,componentName,insertionMo
         case "append":
             targetElement.appendChild(componentNode);
             break;
-        default: console.error("Invalid Insertion Mode");
+        case "replace":
+            targetElement.innerHTML = '';
+            targetElement.appendChild(componentNode);
+            break;
+        default: console.error(`Invalid Insertion Mode:${insertionMode}`);
     }
     document.addEventListener('click', (event) => {
-        if (!componentNode.contains(event.target)) {
+        if (componentNode && !componentNode.contains(event.target)) {
             componentNode.remove();
         }
     });
