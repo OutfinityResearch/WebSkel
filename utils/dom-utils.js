@@ -11,7 +11,15 @@ export function getClosestParentElement(element, selector, stopSelector) {
     }
     return closestParent;
 }
-
+export function urlForPage(url) {
+    let count = 0;
+    for (let i = 0; i < url.length; i++) {
+        if (url[i] === '/') {
+            count++;
+        }
+    }
+    return !(count > 1 || (count === 1 && url[url.length - 1] !== '/'));
+}
 export function sanitize(string) {
     const map = {
         '&': '&amp;',
