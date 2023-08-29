@@ -11,14 +11,14 @@ export function getClosestParentElement(element, selector, stopSelector) {
     }
     return closestParent;
 }
-export function urlForPage(url) {
-    let count = 0;
-    for (let i = 0; i < url.length; i++) {
-        if (url[i] === '/') {
-            count++;
-        }
+export function notBasePage(url) {
+    const slashCount = (url.match(/\//g) || []).length;
+
+    /* If there's more than one slash or only one but not at the end */
+    if (slashCount > 1 || (slashCount === 1 && url.charAt(url.length - 1) !== '/')) {
+        return false;
     }
-    return !(count > 1 || (count === 1 && url[url.length - 1] !== '/'));
+    return true;
 }
 export function sanitize(string) {
     const map = {
