@@ -31,11 +31,14 @@ class WebSkel {
         await loading.showModal();
         return loading;
     }
-
-    async changeToDynamicPage(pageHtmlTagName, skipHistoryState) {
-        const loading= await this.showLoading();
+    /* without server request */
+    async changeToDynamicPage(pageHtmlTagName, dataPresenterParams, skipHistoryState) {
+        const loading = await this.showLoading();
+        let attributesStringPresenter='';
+        if(dataPresenterParams)
+            attributesStringPresenter = Object.entries(dataPresenterParams).map(([key, value]) => `${key}="${value}"`).join(' ');
         try {
-            let result = `<${pageHtmlTagName} data-presenter="${pageHtmlTagName}"></${pageHtmlTagName}>`;
+            const result = `<${pageHtmlTagName} data-presenter="${pageHtmlTagName}" ${attributesStringPresenter}></${pageHtmlTagName}>`;
             if (!skipHistoryState) {
                 const path = "#" + pageHtmlTagName; // leave baseUrl for now
                 window.history.pushState({pageHtmlTagName, relativeUrlContent: result}, path.toString(), path);
@@ -49,11 +52,12 @@ class WebSkel {
         }
     }
 
+    /* with server request */
     async changeToStaticPage(pageUrl, skipHistoryState) {
         const loading= await this.showLoading();
         try {
             const pageContent = await this.fetchTextResult(pageUrl, skipHistoryState);
-             this.updateAppContent(pageContent);
+            this.updateAppContent(pageContent);
         } catch (error) {
             console.log("Failed to change page", error);
         } finally {
@@ -143,6 +147,8 @@ class WebSkel {
         if(relativeUrlPath.startsWith("#")) {
             relativeUrlPath=relativeUrlPath.slice(1);
         }
+        console.log("Fetching Data from URL:",appBaseUrl + relativeUrlPath);
+        /* Sending request to server */
         const response = await fetch(appBaseUrl + relativeUrlPath);
         if (!response.ok) {
             throw new Error("Failed to execute request");
