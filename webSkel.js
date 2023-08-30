@@ -1,4 +1,5 @@
 import {findDoubleDollarWords,createTemplateArray} from "./utils/template-utils.js";
+import {showModal} from "./utils/modal-utils.js";
 
 class WebSkel {
     constructor() {
@@ -7,6 +8,9 @@ class WebSkel {
         this._documentElement = document;
         this.actionRegistry = {};
         this.registerListeners();
+        window.showApplicationError= async(title,message,technical)=> {
+            await showModal(webSkel._appContent,"show-error-modal",{title:title,message:message,technical:technical});
+        }
         console.log("creating new app manager instance");
     }
 
@@ -103,10 +107,37 @@ class WebSkel {
         };
 
         // register listener for data-action attribute
-        this._documentElement.addEventListener("click", (event) => {
+        this._documentElement.addEventListener("click", async (event) => {
             let target= event.target;
 
             while (target && target !== this._documentElement) {
+                if (target.hasAttribute("data-local-action")){
+                    let ce=target;
+                    while(ce.webSkelPresenter===undefined){
+                        ce=ce.parentElement;
+                        if(ce===document){
+                            ce=undefined;
+                            break;
+                        }
+                    }
+                    if(ce!==undefined){
+                        const action = target.getAttribute("data-local-action");
+                        const [actionName, ...actionParams] = action.split(" ");
+                        let p=ce.webSkelPresenter;
+                        p=Object.getPrototypeOf(p);
+                        if(p[actionName]===undefined){
+                            await showApplicationError("Button has no Action","There is no action for the button to execute",`Presenter missing ${actionName} method`);
+                        }else{
+                            try{
+                                ce.webSkelPresenter[actionName](...actionParams);
+                            }catch(error){
+                                await showApplicationError("Error executing action","There is no action for the button to execute",`Encountered ${error}`);
+                            }
+                        }
+                    }else{
+                        await showApplicationError("Missing Presenter","Encountered an error while executing action","No presenter found for the button");
+                    }
+                }
                 if (target.hasAttribute("data-action")) {
                     event.preventDefault(); // Cancel the native event
                     event.stopPropagation(); // Don't bubble/capture the event any further
@@ -187,20 +218,20 @@ class WebSkel {
                             self.variables[attr.nodeName] = attr.nodeValue;
                         }
                         if(attr.name === "data-presenter") {
-                            self.presenter = window.webSkel.initialisePresenter(attr.nodeValue,self);
-                            self.presenter.invalidate = () => {
-                                self.presenter.beforeRender();
+                            self.webSkelPresenter = window.webSkel.initialisePresenter(attr.nodeValue,self);
+                            self.webSkelPresenter.invalidate = () => {
+                                self.webSkelPresenter.beforeRender();
                                 for(let vn in self.variables) {
-                                    if(typeof self.presenter[vn] !== "undefined") {
-                                        self.variables[vn] = self.presenter[vn];
+                                    if(typeof self.webSkelPresenter[vn] !== "undefined") {
+                                        self.variables[vn] = self.webSkelPresenter[vn];
                                     }
                                 }
                                 self.refresh();
-                                self.presenter.afterRender?.();
+                                self.webSkelPresenter.afterRender?.();
                             }
                         }
                     });
-                    if(!self.presenter) {
+                    if(!self.webSkelPresenter) {
                         self.refresh();
                     }
                 }
