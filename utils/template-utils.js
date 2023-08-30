@@ -37,5 +37,4 @@ export function createTemplateArray(str) {
     }
     return result;
 }
-// module.exports={findDoubleDollarWords,createTemplateArray};
 
