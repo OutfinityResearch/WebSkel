@@ -21,7 +21,8 @@ export async function showModal(element, modalComponentName, componentProps) {
 
 function createModal(childTagName) {
     let modal=document.createElement("dialog");
-    modal.innerHTML=`<${childTagName}/>`;
+    modal.innerHTML=`<${childTagName} data-presenter="${childTagName}"/>`;
+    // modal.innerHTML=`<${childTagName}/>`;
     modal.classList.add("modal");
     return modal;
 }
