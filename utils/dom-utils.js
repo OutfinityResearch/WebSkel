@@ -11,15 +11,14 @@ export function getClosestParentElement(element, selector, stopSelector) {
     }
     return closestParent;
 }
+
 export function notBasePage(url) {
     const slashCount = (url.match(/\//g) || []).length;
 
     /* If there's more than one slash or only one but not at the end */
-    if (slashCount > 1 || (slashCount === 1 && url.charAt(url.length - 1) !== '/')) {
-        return false;
-    }
-    return true;
+    return !(slashCount > 1 || (slashCount === 1 && url.charAt(url.length - 1) !== '/'));
 }
+
 export function sanitize(string) {
     const map = {
         '&': '&amp;',
@@ -32,7 +31,7 @@ export function sanitize(string) {
         '=': '&#x3D;'
     };
     const reg = /[&<>"'/]/ig;
-    return string.replace(reg, (match)=>(map[match]));
+    return string.replace(reg, (match) => (map[match]));
 }
 
 export function getMainAppContainer(element) {
