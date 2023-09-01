@@ -13,13 +13,14 @@ export function createTemplateArray(str) {
     }
 
     function startVariable(cp) {
-        if(str[cp] !== '$' || str[cp+1] !== '$') {
+        if(str[cp] !== '$' || str[cp + 1] !== '$') {
             return STR_TOKEN;
         }
         else {
             return VAR_TOKEN;
         }
     }
+
     let result = [];
     let k = 0;
     while(k < str.length ) {
@@ -28,7 +29,6 @@ export function createTemplateArray(str) {
         }
         result.push(str.slice(currentPos, k));
         currentPos = k;
-
         while(!isSeparator(str[k]) && k < str.length) {
             k++;
         }
@@ -37,4 +37,3 @@ export function createTemplateArray(str) {
     }
     return result;
 }
-

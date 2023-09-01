@@ -8,8 +8,8 @@ class WebSkel {
         this._documentElement = document;
         this.actionRegistry = {};
         this.registerListeners();
-        window.showApplicationError = async(title,message,technical)=> {
-            await showModal(webSkel._appContent,"show-error-modal",{title:title, message:message, technical:technical});
+        window.showApplicationError = async(title, message, technical)=> {
+            await showModal(webSkel._appContent, "show-error-modal",{title: title, message: message, technical: technical});
         }
         console.log("creating new app manager instance");
     }
@@ -165,9 +165,7 @@ class WebSkel {
         if (!actionHandler) {
             throw new Error(`No action handler registered for "${actionName}"`);
         }
-
         let thisCall = params && params[0] instanceof HTMLElement ? params[0] : null;
-
         actionHandler.call(thisCall, ...params);
     }
 
@@ -182,11 +180,8 @@ class WebSkel {
         if (!response.ok) {
             throw new Error("Failed to execute request");
         }
-
         const result = await response.text();
-
         if (!skipHistoryState) {
-            // const path = new URL(relativeUrlPath, baseUrl);
             const path = appBaseUrl + "#" + relativeUrlPath; // leave baseUrl for now
             window.history.pushState({ relativeUrlPath, relativeUrlContent: result }, path.toString(), path);
         }
@@ -235,9 +230,9 @@ class WebSkel {
                 }
 
                 refresh() {
-                    let stringHTML="";
-                    for(let item of this.templateArray){
-                        item.startsWith("$$")?stringHTML += this.variables[item.slice(2)]:stringHTML += item;
+                    let stringHTML = "";
+                    for(let item of this.templateArray) {
+                        item.startsWith("$$") ? stringHTML += this.variables[item.slice(2)] : stringHTML += item;
                     }
                     this.innerHTML = stringHTML;
                 }

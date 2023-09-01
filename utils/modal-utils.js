@@ -6,7 +6,6 @@ export async function showModal(element, modalComponentName, componentProps) {
         existingModalContainer.close();
         existingModalContainer.remove();
     }
-
     const modalContainer = element || getMainAppContainer(element);
     const modal = Object.assign(createModal(modalComponentName), {
         component: modalComponentName,
@@ -14,15 +13,13 @@ export async function showModal(element, modalComponentName, componentProps) {
         componentProps,
     });
     modalContainer.appendChild(modal);
-
     await modal.showModal();
     return modal;
 }
 
 function createModal(childTagName) {
-    let modal=document.createElement("dialog");
+    let modal = document.createElement("dialog");
     modal.innerHTML=`<${childTagName} data-presenter="${childTagName}"/>`;
-    // modal.innerHTML=`<${childTagName}/>`;
     modal.classList.add("modal");
     return modal;
 }
@@ -43,9 +40,7 @@ export async function showActionBox(targetElement, primaryKey, componentName, in
     const componentNode = document.createElement(`${componentName}`);
     /* We could use the id of the parent element instead and remove it here - TBD */
     componentNode.setAttribute("id", primaryKey);
-
     let oldComponentNode;
-
     const removeComponent = () => {
         if (componentNode) {
             componentNode.remove();
@@ -96,7 +91,5 @@ export async function showActionBox(targetElement, primaryKey, componentName, in
             removeComponent();
         }
     };
-
     document.addEventListener('click', clickHandler);
 }
-
