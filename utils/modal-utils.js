@@ -32,6 +32,7 @@ export function closeModal(element) {
     }
 }
 
+
 export async function showActionBox(targetElement, primaryKey, componentName, insertionMode) {
     const existingComponentNode = document.getElementById(`${primaryKey}`);
     if (existingComponentNode) {
