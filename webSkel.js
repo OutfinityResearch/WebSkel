@@ -126,6 +126,7 @@ class WebSkel {
                         p = Object.getPrototypeOf(p);
                         if(p[actionName] === undefined) {
                             await showApplicationError("Button has no Action","There is no action for the button to execute",`Presenter missing ${actionName} method`);
+                            console.error("No action for the button to execute");
                         } else {
                             try {
                                 currentCustomElement.webSkelPresenter[actionName](target, ...actionParams);
