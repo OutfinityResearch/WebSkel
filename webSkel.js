@@ -130,10 +130,12 @@ class WebSkel {
                             try {
                                 currentCustomElement.webSkelPresenter[actionName](target, ...actionParams);
                             } catch(error) {
+                                console.error(error);
                                 await showApplicationError("Error executing action","There is no action for the button to execute",`Encountered ${error}`);
                             }
                         }
                     } else {
+                        console.error("No presenter found for the button");
                         await showApplicationError("Missing Presenter","Encountered an error while executing action","No presenter found for the button");
                     }
                 }

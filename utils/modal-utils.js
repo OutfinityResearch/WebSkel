@@ -19,7 +19,7 @@ export async function showModal(element, modalComponentName, componentProps) {
 
 function createModal(childTagName) {
     let modal = document.createElement("dialog");
-    modal.innerHTML=`<${childTagName}/>`;
+    modal.innerHTML = `<${childTagName}/>`;
     modal.classList.add("modal");
     return modal;
 }
@@ -31,7 +31,6 @@ export function closeModal(element) {
         existingModal.remove();
     }
 }
-
 
 export async function showActionBox(targetElement, primaryKey, componentName, insertionMode) {
     const existingComponentNode = document.getElementById(`${primaryKey}`);
