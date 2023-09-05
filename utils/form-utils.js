@@ -11,6 +11,9 @@ export async function extractFormInformation(element) {
         formData.isValid = form.checkValidity();
     }
     const namedElements = [...form.querySelectorAll("[name]:not([type=hidden])")];
+
+    let password={};
+
     for (const element of namedElements) {
         formData.data[element.name] = element.tagName === "CHECKBOX" ? element.checked : element.value;
 
@@ -27,6 +30,16 @@ export async function extractFormInformation(element) {
         } else if (typeof element.getInputElement === "function") {
             const inputElement = await element.getInputElement();
             isValid = inputElement.checkValidity();
+        }
+
+        if(checkPasswordConfirm(element,password)){
+            element.setCustomValidity("");
+            isValid=true;
+        }
+        else {
+            element.setCustomValidity("Passwords do not match!");
+            isValid=false;
+            formData.isValid=false;
         }
         formData.elements[element.name] = {
             isValid,
@@ -55,6 +68,16 @@ async function imageUpload(file) {
     })
 }
 
+function checkPasswordConfirm(element, password){
+
+    if(element.getAttribute("data-id") === "user-password"){
+        password.password=element.value;
+    }
+    if(element.getAttribute("data-id") === "user-password-confirm"){
+        return password.password === element.value;
+    }
+    return true;
+}
 export function checkValidityFormInfo(formInfo) {
     if(!formInfo.isValid) {
         let entries = Object.entries(formInfo.elements);
