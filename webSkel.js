@@ -38,7 +38,7 @@ class WebSkel {
    initialiseService(serviceName,...args){
         let service;
         try {
-            service = new this.servicesRegistry[serviceName](...args);
+            service = Object.getPrototypeOf(new this.servicesRegistry[serviceName](...args));
         } catch(e) {
             showApplicationError(`No service ${serviceName} found.`,`No service ${serviceName} found`,`No service ${serviceName} found`);
             console.log(`No service ${serviceName} found. ${e}`);
