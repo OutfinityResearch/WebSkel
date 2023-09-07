@@ -5,6 +5,7 @@ class WebSkel {
     constructor() {
         this._appContent = {};
         this.presentersRegistry = {};
+        this.servicesRegistry = {};
         this._documentElement = document;
         this.actionRegistry = {};
         this.registerListeners();
@@ -17,16 +18,34 @@ class WebSkel {
     registerPresenter(name, instance) {
         this.presentersRegistry[name] = instance;
     }
-
+    registerService(name, instance) {
+        this.servicesRegistry[name] = instance;
+    }
+    getService(name) {
+        return this.servicesRegistry[name];
+    }
     initialisePresenter(presenterName, component) {
         let presenter;
         try {
             presenter = new this.presentersRegistry[presenterName](component);
         } catch(e) {
-            console.error(`No presenter ${presenterName} found.`);
+            showApplicationError(`No presenter ${presenterName} found.`,`No presenter ${presenterName} found.`,`No presenter ${presenterName} found.`);
+            console.log(`No presenter ${presenterName} found. ${e}`);
+            return undefined;
         }
         return presenter;
     }
+   initialiseService(serviceName,...args){
+        let service;
+        try {
+            service = new this.servicesRegistry[serviceName](...args);
+        } catch(e) {
+            showApplicationError(`No service ${serviceName} found.`,`No service ${serviceName} found`,`No service ${serviceName} found`);
+            console.log(`No service ${serviceName} found. ${e}`);
+            return undefined;
+        }
+        return service;
+}
 
     async showLoading() {
         const loading = document.createElement("dialog");
@@ -209,7 +228,7 @@ class WebSkel {
 
                 async connectedCallback() {
                     let self = this;
-                    Array.from(self.attributes).forEach(attr => {
+                    Array.from(self.attributes).forEach((attr) => {
                         if(typeof self.variables[attr.nodeName]) {
                             self.variables[attr.nodeName] = attr.nodeValue;
                         }

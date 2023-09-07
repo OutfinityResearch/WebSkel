@@ -7,7 +7,7 @@ export async function showModal(element, modalComponentName, componentProps) {
         existingModalContainer.remove();
     }
     const modalContainer = element || getMainAppContainer(element);
-    const modal = Object.assign(createModal(modalComponentName), {
+    const modal = Object.assign(createModal(modalComponentName,componentProps), {
         component: modalComponentName,
         cssClass: modalComponentName,
         componentProps,
@@ -17,9 +17,15 @@ export async function showModal(element, modalComponentName, componentProps) {
     return modal;
 }
 
-function createModal(childTagName) {
+function createModal(childTagName,componentProps) {
     let modal = document.createElement("dialog");
-    modal.innerHTML = `<${childTagName}/>`;
+    let componentString="";
+    if(componentProps!==undefined){
+        Object.keys(componentProps).forEach((componentKey) => {
+            componentString+=` data-${componentKey}="${componentProps[componentKey]}"`;
+        });
+    }
+    componentString===""? modal.innerHTML = `<${childTagName}/>`:modal.innerHTML = `<${childTagName}${componentString}/>`;
     modal.classList.add("modal");
     return modal;
 }
