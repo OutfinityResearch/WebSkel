@@ -1,6 +1,6 @@
 import {getClosestParentElement} from "./dom-utils.js";
 
-export async function extractFormInformation(element) {
+export async function extractFormInformation(element, conditions) {
     const form = getClosestParentElement(element, "form, [data-form]");
     const formData = {
         data: {},
@@ -24,27 +24,38 @@ export async function extractFormInformation(element) {
                 console.log(err);
             }
         }
-        let isValid = false;
+        let isValid = true;
+        element.setCustomValidity("");
         if (typeof element.checkValidity === "function") {
             isValid = element.checkValidity();
         } else if (typeof element.getInputElement === "function") {
             const inputElement = await element.getInputElement();
             isValid = inputElement.checkValidity();
         }
-
-        if(checkPasswordConfirm(element,password)){
-            element.setCustomValidity("");
-            isValid=true;
-        }
-        else {
-            element.setCustomValidity("Passwords do not match!");
-            isValid=false;
-            formData.isValid=false;
+        if(isValid===true) {
+            if (conditions) {
+                let conditionFunctionName = element.getAttribute("data-condition")
+                if (conditionFunctionName)
+                    isValid = conditions[conditionFunctionName]();
+                    if(isValid){
+                        element.setCustomValidity("");
+                    }else {
+                        element.setCustomValidity("Passwords do not match!");
+                        formData.isValid=false;
+                    }
+            }
         }
         formData.elements[element.name] = {
             isValid,
             element,
         };
+        let input = document.querySelector("#" + element.getAttribute("data-id"));
+        if(!isValid) {
+            input.classList.add("input-invalid");
+        }
+        else{
+            input.classList.remove("input-invalid");
+        }
     }
     if(!form.checkValidity()) {
         form.reportValidity();
@@ -82,10 +93,7 @@ export function checkValidityFormInfo(formInfo) {
     if(!formInfo.isValid) {
         let entries = Object.entries(formInfo.elements);
         for(const entry of entries) {
-            if(!entry[1].isValid) {
-                let input = document.querySelector("#" + entry[1].element.getAttribute("data-id"));
-                input.classList.add("input-invalid");
-            }
+
         }
         return false;
     }
