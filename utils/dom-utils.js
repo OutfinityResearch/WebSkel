@@ -28,7 +28,8 @@ export function sanitize(string) {
         "'": '&#x27;',
         "/": '&#x2F;',
         '`': '&#x60;',
-        '=': '&#x3D;'
+        '=': '&#x3D;',
+        ' ': '&nbsp;'
     };
     const reg = /[&<>"'/]/ig;
     return string.replace(reg, (match) => (map[match]));
