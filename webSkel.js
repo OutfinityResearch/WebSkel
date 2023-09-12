@@ -78,7 +78,7 @@ class WebSkel {
 
     /* with server request */
     async changeToStaticPage(pageUrl, skipHistoryState) {
-        const loading= await this.showLoading();
+        const loading = await this.showLoading();
         try {
             const pageContent = await this.fetchTextResult(pageUrl, skipHistoryState);
             this.updateAppContent(pageContent);
@@ -194,9 +194,9 @@ class WebSkel {
     async fetchTextResult(relativeUrlPath, skipHistoryState) {
         const appBaseUrl = new URL(`${window.location.protocol}//${window.location.host}`);
         if(relativeUrlPath.startsWith("#")) {
-            relativeUrlPath=relativeUrlPath.slice(1);
+            relativeUrlPath = relativeUrlPath.slice(1);
         }
-        console.log("Fetching Data from URL:",appBaseUrl + relativeUrlPath);
+        console.log("Fetching Data from URL: ", appBaseUrl + relativeUrlPath);
         /* Sending request to server */
         const response = await fetch(appBaseUrl + relativeUrlPath);
         if (!response.ok) {
