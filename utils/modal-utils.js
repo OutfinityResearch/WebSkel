@@ -41,7 +41,7 @@ export function closeModal(element) {
 export async function showActionBox(targetElement, primaryKey, componentName, insertionMode) {
     const existingComponentNode = document.getElementById(`${primaryKey}`);
     if (existingComponentNode) {
-        return;
+        return null;
     }
     const componentNode = document.createElement(`${componentName}`);
     /* We could use the id of the parent element instead and remove it here - TBD */
@@ -53,6 +53,7 @@ export async function showActionBox(targetElement, primaryKey, componentName, in
             document.removeEventListener('click', clickHandler);
         }
     };
+
 
     switch (insertionMode) {
         case "prepend":
@@ -97,5 +98,7 @@ export async function showActionBox(targetElement, primaryKey, componentName, in
             removeComponent();
         }
     };
+    componentNode.clickHandler=clickHandler;
     document.addEventListener('click', clickHandler);
+    return componentNode;
 }
