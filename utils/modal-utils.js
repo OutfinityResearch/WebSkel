@@ -37,7 +37,13 @@ export function closeModal(element) {
         existingModal.remove();
     }
 }
-
+export function removeActionBox(actionBox,instance){
+    document.removeEventListener('click',actionBox.clickHandler);
+    actionBox.remove();
+    if(instance!==undefined){
+        delete instance.actionBox;
+    }
+}
 export async function showActionBox(targetElement, primaryKey, componentName, insertionMode) {
     const existingComponentNode = document.getElementById(`${primaryKey}`);
     if (existingComponentNode) {
@@ -47,13 +53,6 @@ export async function showActionBox(targetElement, primaryKey, componentName, in
     /* We could use the id of the parent element instead and remove it here - TBD */
     componentNode.setAttribute("id", primaryKey);
     let oldComponentNode;
-    const removeComponent = () => {
-        if (componentNode) {
-            componentNode.remove();
-            document.removeEventListener('click', clickHandler);
-        }
-    };
-
 
     switch (insertionMode) {
         case "prepend":
@@ -95,7 +94,7 @@ export async function showActionBox(targetElement, primaryKey, componentName, in
                 const parentElement = componentNode.parentNode;
                 parentElement.innerHTML = oldComponentNode;
             }
-            removeComponent();
+            removeActionBox(componentNode);
         }
     };
     componentNode.clickHandler=clickHandler;
