@@ -17,15 +17,15 @@ export async function showModal(element, modalComponentName, componentProps) {
     return modal;
 }
 
-function createModal(childTagName,componentProps) {
+function createModal(childTagName, componentProps) {
     let modal = document.createElement("dialog");
-    let componentString="";
-    if(componentProps!==undefined){
+    let componentString= "";
+    if(componentProps !== undefined) {
         Object.keys(componentProps).forEach((componentKey) => {
-            componentString+=` data-${componentKey}="${componentProps[componentKey]}"`;
+            componentString +=` data-${componentKey}="${componentProps[componentKey]}"`;
         });
     }
-    componentString===""? modal.innerHTML = `<${childTagName}/>`:modal.innerHTML = `<${childTagName}${componentString}/>`;
+    componentString === "" ? modal.innerHTML = `<${childTagName}/>`:modal.innerHTML = `<${childTagName}${componentString}/>`;
     modal.classList.add("modal");
     return modal;
 }
