@@ -18,12 +18,7 @@ class WebSkel {
     registerPresenter(name, instance) {
         this.presentersRegistry[name] = instance;
     }
-    registerService(name, instance) {
-        this.servicesRegistry[name] = instance;
-    }
-    getService(name) {
-        return this.servicesRegistry[name];
-    }
+
     initialisePresenter(presenterName, component) {
         let presenter;
         try {
@@ -35,17 +30,12 @@ class WebSkel {
         }
         return presenter;
     }
-   initialiseService(serviceName,...args){
-        let service;
-        try {
-            service = Object.getPrototypeOf(new this.servicesRegistry[serviceName](...args));
-        } catch(e) {
-            showApplicationError(`No service ${serviceName} found.`,`No service ${serviceName} found`,`No service ${serviceName} found`);
-            console.log(`No service ${serviceName} found. ${e}`);
-            return undefined;
-        }
-        return service;
-}
+   initialiseService(serviceName, instance){
+        this.servicesRegistry[serviceName] = instance;
+    }
+    getService(name) {
+        return this.servicesRegistry[name];
+    }
 
     async showLoading() {
         const loading = document.createElement("dialog");
