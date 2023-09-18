@@ -14,7 +14,6 @@ class WebSkel {
         }
         console.log("creating new app manager instance");
     }
-
     registerPresenter(name, instance) {
         this.presentersRegistry[name] = instance;
     }
