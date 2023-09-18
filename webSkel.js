@@ -30,7 +30,7 @@ class WebSkel {
         return presenter;
     }
    initialiseService(serviceName, instance){
-        this.servicesRegistry[serviceName] = instance;
+        this.servicesRegistry[serviceName] = new instance;
     }
     getService(name) {
         return this.servicesRegistry[name];
