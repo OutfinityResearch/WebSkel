@@ -7,10 +7,10 @@ export async function showModal(element, modalComponentName, componentProps) {
         existingModalContainer.remove();
     }
     const modalContainer = element || getMainAppContainer(element);
-    const modal = Object.assign(createModal(modalComponentName,componentProps), {
+    const modal = Object.assign(createModal(modalComponentName, componentProps), {
         component: modalComponentName,
         cssClass: modalComponentName,
-        componentProps,
+        componentProps
     });
     modalContainer.appendChild(modal);
     await modal.showModal();
@@ -37,13 +37,15 @@ export function closeModal(element) {
         existingModal.remove();
     }
 }
-export function removeActionBox(actionBox,instance){
-    document.removeEventListener('click',actionBox.clickHandler);
+
+export function removeActionBox(actionBox, instance){
+    document.removeEventListener('click', actionBox.clickHandler);
     actionBox.remove();
-    if(instance!==undefined){
+    if(instance !== undefined) {
         delete instance.actionBox;
     }
 }
+
 export async function showActionBox(targetElement, primaryKey, componentName, insertionMode) {
     const existingComponentNode = document.getElementById(`${primaryKey}`);
     if (existingComponentNode) {
@@ -53,7 +55,6 @@ export async function showActionBox(targetElement, primaryKey, componentName, in
     /* We could use the id of the parent element instead and remove it here - TBD */
     componentNode.setAttribute("id", primaryKey);
     let oldComponentNode;
-
     switch (insertionMode) {
         case "prepend":
             targetElement.parentNode.insertBefore(componentNode, targetElement);

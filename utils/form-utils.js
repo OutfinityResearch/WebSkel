@@ -1,4 +1,4 @@
-import {getClosestParentElement} from "./dom-utils.js";
+import { getClosestParentElement } from "./dom-utils.js";
 
 export async function extractFormInformation(element, conditions) {
     const form = getClosestParentElement(element, "form, [data-form]");
@@ -11,9 +11,7 @@ export async function extractFormInformation(element, conditions) {
         formData.isValid = form.checkValidity();
     }
     const namedElements = [...form.querySelectorAll("[name]:not([type=hidden])")];
-
-    let password={};
-
+    let password = {};
     for (const element of namedElements) {
         formData.data[element.name] = element.tagName === "CHECKBOX" ? element.checked : element.value;
 
@@ -32,28 +30,29 @@ export async function extractFormInformation(element, conditions) {
             const inputElement = await element.getInputElement();
             isValid = inputElement.checkValidity();
         }
-        if(isValid===true) {
+        if(isValid === true) {
             if (conditions) {
                 let conditionFunctionName = element.getAttribute("data-condition")
-                if (conditionFunctionName)
+                if (conditionFunctionName) {
                     isValid = conditions[conditionFunctionName]();
-                    if(isValid){
+                    if(isValid) {
                         element.setCustomValidity("");
-                    }else {
+                    } else {
                         element.setCustomValidity("Passwords do not match!");
-                        formData.isValid=false;
+                        formData.isValid = false;
                     }
+                }
             }
         }
         formData.elements[element.name] = {
             isValid,
-            element,
+            element
         };
         let input = document.querySelector("#" + element.getAttribute("data-id"));
         if(!isValid) {
             input.classList.add("input-invalid");
         }
-        else{
+        else {
             input.classList.remove("input-invalid");
         }
     }
@@ -66,7 +65,7 @@ export async function extractFormInformation(element, conditions) {
 async function imageUpload(file) {
     let base64String = "";
     let reader = new FileReader();
-    return await new Promise((resolve, reject)=>{
+    return await new Promise((resolve, reject) => {
         reader.onload = function () {
             base64String = reader.result;
             resolve(base64String);
@@ -80,15 +79,15 @@ async function imageUpload(file) {
 }
 
 function checkPasswordConfirm(element, password){
-
-    if(element.getAttribute("data-id") === "user-password"){
-        password.password=element.value;
+    if(element.getAttribute("data-id") === "user-password") {
+        password.password = element.value;
     }
-    if(element.getAttribute("data-id") === "user-password-confirm"){
+    if(element.getAttribute("data-id") === "user-password-confirm") {
         return password.password === element.value;
     }
     return true;
 }
+
 export function checkValidityFormInfo(formInfo) {
     if(!formInfo.isValid) {
         let entries = Object.entries(formInfo.elements);

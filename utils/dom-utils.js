@@ -24,7 +24,6 @@ export function getClosestParentElement(element, selector, stopSelector) {
  */
 export function reverseQuerySelector(startElement, targetSelector, stopSelector = null) {
     const visited = new Set();
-
     // Argument validation
     if (!(startElement instanceof Element)) {
         throw new TypeError('The first argument must be a DOM Element.');
@@ -32,16 +31,12 @@ export function reverseQuerySelector(startElement, targetSelector, stopSelector 
     if (typeof targetSelector !== 'string' || targetSelector.trim() === '') {
         throw new TypeError('The second argument must be a non-empty string.');
     }
-
     // Check the startElement first
     if (startElement.matches(targetSelector)) {
         return startElement;
     }
-
     visited.add(startElement);
-
     let currentElement = startElement;
-
     // Begin DOM traversal
     while (currentElement) {
         const parent = currentElement.parentElement;
@@ -85,25 +80,20 @@ export function reverseQuerySelector(startElement, targetSelector, stopSelector 
                 sibling = sibling.nextElementSibling;
             }
         }
-
         // Ascend to the parent element
         currentElement = parent;
-
         if (currentElement && !visited.has(currentElement)) {
             visited.add(currentElement);
-
             // Check the parent
             if (currentElement.matches(targetSelector)) {
                 return currentElement;
             }
-
             // Check if traversal should be stopped
             if (stopSelector && currentElement.matches(stopSelector)) {
                 break;
             }
         }
     }
-
     // If no matching element is found
     return null;
 }
