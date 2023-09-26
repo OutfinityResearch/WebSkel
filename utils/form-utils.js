@@ -1,7 +1,7 @@
 import { getClosestParentElement } from "./dom-utils.js";
 
 export async function extractFormInformation(element, conditions) {
-    const form = getClosestParentElement(element, "form, [data-form]");
+    const form = getClosestParentElement(element, "form");
     const formData = {
         data: {},
         elements: {},
