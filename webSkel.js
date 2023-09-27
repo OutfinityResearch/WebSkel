@@ -51,7 +51,7 @@ class WebSkel {
         const loading = await this.showLoading();
         let attributesStringPresenter='';
         if(dataPresenterParams)
-            attributesStringPresenter = Object.entries(dataPresenterParams).map(([key, value]) => `${key}="${value}"`).join(' ');
+            attributesStringPresenter = Object.entries(dataPresenterParams).map(([key, value]) => `data-${key}="${value}"`).join(' ');
         try {
             const result = `<${pageHtmlTagName} data-presenter="${pageHtmlTagName}" ${attributesStringPresenter}></${pageHtmlTagName}>`;
             if (!skipHistoryState) {
