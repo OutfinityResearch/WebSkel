@@ -18,10 +18,10 @@ class WebSkel {
         this.presentersRegistry[name] = instance;
     }
 
-    initialisePresenter(presenterName, component) {
+    initialisePresenter(presenterName, component, invalidate) {
         let presenter;
         try {
-            presenter = new this.presentersRegistry[presenterName](component);
+            presenter = new this.presentersRegistry[presenterName](component, invalidate);
         } catch(e) {
             showApplicationError(`No presenter ${presenterName} found.`,`No presenter ${presenterName} found.`,`No presenter ${presenterName} found.`);
             console.log(`No presenter ${presenterName} found. ${e}`);
@@ -224,17 +224,20 @@ class WebSkel {
                             self.variables[attr.nodeName] = attr.nodeValue;
                         }
                         if(attr.name === "data-presenter") {
-                            self.webSkelPresenter = window.webSkel.initialisePresenter(attr.nodeValue, self);
-                            self.webSkelPresenter.invalidate = () => {
-                                self.webSkelPresenter.beforeRender();
-                                for(let vn in self.variables) {
-                                    if(typeof self.webSkelPresenter[vn] !== "undefined") {
-                                        self.variables[vn] = self.webSkelPresenter[vn];
+                            const invalidate = () => {
+                                setTimeout(()=>{
+                                    self.webSkelPresenter.beforeRender();
+                                    for(let vn in self.variables) {
+                                        if(typeof self.webSkelPresenter[vn] !== "undefined") {
+                                            self.variables[vn] = self.webSkelPresenter[vn];
+                                        }
                                     }
-                                }
-                                self.refresh();
-                                self.webSkelPresenter.afterRender?.();
+                                    self.refresh();
+                                    self.webSkelPresenter.afterRender?.();
+                                },0);
                             }
+                            self.webSkelPresenter = window.webSkel.initialisePresenter(attr.nodeValue, self, invalidate);
+                            self.webSkelPresenter.invalidate = invalidate;
                         }
                     });
                     if(!self.webSkelPresenter) {
