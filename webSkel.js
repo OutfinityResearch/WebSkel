@@ -47,7 +47,7 @@ class WebSkel {
     }
 
     /* without server request */
-    async changeToDynamicPage(pageHtmlTagName, dataPresenterParams, skipHistoryState) {
+    async changeToDynamicPage(pageHtmlTagName, url, dataPresenterParams, skipHistoryState) {
         const loading = await this.showLoading();
         let attributesStringPresenter='';
         if(dataPresenterParams)
@@ -55,7 +55,7 @@ class WebSkel {
         try {
             const result = `<${pageHtmlTagName} data-presenter="${pageHtmlTagName}" ${attributesStringPresenter}></${pageHtmlTagName}>`;
             if (!skipHistoryState) {
-                const path = "#" + pageHtmlTagName; // leave baseUrl for now
+                const path = ["#", url].join("");
                 window.history.pushState({pageHtmlTagName, relativeUrlContent: result}, path.toString(), path);
             }
             this.updateAppContent(result);
