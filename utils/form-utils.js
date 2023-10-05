@@ -48,7 +48,7 @@ export async function extractFormInformation(element, conditions) {
             isValid,
             element
         };
-        let input = document.querySelector("#" + element.getAttribute("data-id"));
+        let input = document.querySelector(`[id = '${element.getAttribute("data-id")}' ]`);
         if(!isValid) {
             input.classList.add("input-invalid");
         }
