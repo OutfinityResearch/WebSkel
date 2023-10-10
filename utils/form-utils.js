@@ -48,12 +48,12 @@ export async function extractFormInformation(element, conditions) {
             isValid,
             element
         };
-        let input = document.querySelector(`[id = '${element.getAttribute("data-id")}' ]`);
+        let inputBorderElem = document.querySelector(`[data-id = '${element.getAttribute("id")}' ]`);
         if(!isValid) {
-            input.classList.add("input-invalid");
+            inputBorderElem.classList.add("input-invalid");
         }
         else {
-            input.classList.remove("input-invalid");
+            inputBorderElem.classList.remove("input-invalid");
         }
     }
     if(!form.checkValidity()) {
