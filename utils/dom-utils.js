@@ -105,20 +105,13 @@ export function notBasePage(url) {
     return !(slashCount > 1 || (slashCount === 1 && url.charAt(url.length - 1) !== '/'));
 }
 
-export function sanitize(string) {
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#x27;',
-        "/": '&#x2F;',
-        '`': '&#x60;',
-        '=': '&#x3D;',
-        ' ': '&nbsp;'
-    };
-    const reg = /[&<>"'/]/ig;
-    return string.replace(reg, (match) => (map[match]));
+export function sanitize(str) {
+    return str.replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
+        .replace(/\s/g, '&nbsp;');
 }
 
 export function getMainAppContainer(element) {
