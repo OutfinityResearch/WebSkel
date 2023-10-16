@@ -10,7 +10,7 @@ class WebSkel {
         this.actionRegistry = {};
         this.registerListeners();
         window.showApplicationError = async(title, message, technical)=> {
-            await showModal(webSkel._appContent, "show-error-modal",{title: title, message: message, technical: technical});
+            await showModal(webSkel._appContent, "show-error-modal",{presenter:"show-error-modal", title: title, message: message, technical: technical});
         }
         console.log("creating new app manager instance");
     }
