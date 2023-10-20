@@ -34,11 +34,11 @@ export async function extractFormInformation(element, conditions) {
             if (conditions) {
                 let conditionFunctionName = element.getAttribute("data-condition")
                 if (conditionFunctionName) {
-                    isValid = conditions[conditionFunctionName]();
+                    isValid = conditions[conditionFunctionName].fn(element);
                     if(isValid) {
                         element.setCustomValidity("");
                     } else {
-                        element.setCustomValidity("Passwords do not match!");
+                        element.setCustomValidity(conditions[conditionFunctionName].errorMessage);
                         formData.isValid = false;
                     }
                 }
