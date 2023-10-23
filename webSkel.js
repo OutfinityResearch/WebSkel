@@ -119,8 +119,12 @@ class WebSkel {
         // register listener for data-action attribute
         this._documentElement.addEventListener("click", async (event) => {
             let target= event.target;
-            while (target && target !== this._documentElement) {
+            let stopPropagation = false;
+            while (target && target !== this._documentElement && !stopPropagation) {
                 if (target.hasAttribute("data-local-action")) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    stopPropagation = true;
                     let currentCustomElement= target;
                     while(currentCustomElement.webSkelPresenter === undefined) {
                         currentCustomElement = currentCustomElement.parentElement;
@@ -149,22 +153,25 @@ class WebSkel {
                         console.error("No presenter found for the button");
                         await showApplicationError("Missing Presenter","Encountered an error while executing action","No presenter found for the button");
                     }
-                }
-                if (target.hasAttribute("data-action")) {
-                    event.preventDefault(); // Cancel the native event
-                    event.stopPropagation(); // Don't bubble/capture the event any further
+                }else {
+                    if (target.hasAttribute("data-action")) {
+                        event.preventDefault(); // Cancel the native event
+                        event.stopPropagation(); // Don't bubble/capture the event any further
+                        stopPropagation = true;
+                        const action = target.getAttribute("data-action");
+                        const [actionName, ...actionParams] = action.split(" ");
+                        if (actionName) {
+                            this.callAction(actionName, target, ...actionParams);
+                        }
+                        else {
+                            console.error(`${target} : data action attribute value should not be empty!`);
+                        }
+                        break;
+                    }
 
-                    const action = target.getAttribute("data-action");
-                    const [actionName, ...actionParams] = action.split(" ");
-                    if (actionName) {
-                        this.callAction(actionName, target, ...actionParams);
-                    }
-                    else {
-                        console.error(`${target} : data action attribute value should not be empty!`);
-                    }
-                    break;
                 }
                 target = target.parentElement;
+
             }
         });
     }
