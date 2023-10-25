@@ -51,7 +51,7 @@ class WebSkel {
         const loading = await this.showLoading();
         let attributesStringPresenter='';
         if(!this.presentersRegistry.hasOwnProperty(pageHtmlTagName)){
-            await showApplicationError("Page doesn't exist!", "Page doesn't exist!", `Page with presenter name: "${pageHtmlTagName}" doesn't exist in presenterRegistry`);
+            await showApplicationError("Page doesn't exist!", `Page '${pageHtmlTagName}' doesn't exist!`, `Page with presenter name: '${pageHtmlTagName}' doesn't exist in presenterRegistry`);
             loading.close();
             loading.remove();
             return
