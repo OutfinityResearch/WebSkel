@@ -17,7 +17,9 @@ export async function extractFormInformation(element, conditions) {
 
         if(element.getAttribute("type") === "file") {
             try {
-                formData.data[element.name] = await imageUpload(element.files[0]);
+                if(element.files.length>0) {
+                    formData.data[element.name] = await imageUpload(element.files[0])
+                }
             } catch (err) {
                 console.log(err);
             }
