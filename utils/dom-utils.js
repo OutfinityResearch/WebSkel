@@ -11,6 +11,7 @@ export function getClosestParentElement(element, selector, stopSelector) {
     }
     return closestParent;
 }
+
 /**
  * Finds the closest DOM element matching a given selector,
  * starting from a provided element and searching through its
@@ -112,6 +113,19 @@ export function sanitize(str) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;')
         .replace(/\s/g, '&nbsp;');
+}
+export function unsanitize(str) {
+    if (typeof str !== 'string') {
+        throw new TypeError('unsanitize expects a string');
+    }
+    const textArea = document.createElement('textarea');
+    textArea.innerHTML = str;
+    return textArea.value;
+}
+
+export function customTrim(str) {
+    return str.replace(/^[\u00A0\s]+|[\u00A0\s]+$/g, '')
+        .trim();
 }
 
 export function getMainAppContainer(element) {
