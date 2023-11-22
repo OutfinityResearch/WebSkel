@@ -38,9 +38,13 @@ class WebSkel {
         return this.servicesRegistry[name];
     }
 
-    async showLoading() {
+    async showLoading(element) {
         const loading = document.createElement("dialog");
-        loading.classList.add("spinner");
+        if(!element){
+            loading.classList.add("spinner");
+        }else {
+            loading.insertAdjacentHTML("afterbegin", element);
+        }
         document.body.appendChild(loading);
         await loading.showModal();
         return loading;
