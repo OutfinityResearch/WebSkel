@@ -36,7 +36,7 @@ export async function extractFormInformation(element, conditions) {
             if (conditions) {
                 let conditionFunctionName = element.getAttribute("data-condition")
                 if (conditionFunctionName) {
-                    isValid = conditions[conditionFunctionName].fn(element);
+                    isValid = conditions[conditionFunctionName].fn(element, formData);
                     if(isValid) {
                         element.setCustomValidity("");
                     } else {
@@ -78,16 +78,6 @@ async function imageUpload(file) {
             reject("No file given as input at imageUpload");
         }
     })
-}
-
-function checkPasswordConfirm(element, password){
-    if(element.getAttribute("data-id") === "user-password") {
-        password.password = element.value;
-    }
-    if(element.getAttribute("data-id") === "user-password-confirm") {
-        return password.password === element.value;
-    }
-    return true;
 }
 
 export function checkValidityFormInfo(formInfo) {
