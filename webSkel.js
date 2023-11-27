@@ -1,5 +1,6 @@
 import { findDoubleDollarWords, createTemplateArray } from "./utils/template-utils.js";
 import { showModal } from "./utils/modal-utils.js";
+import { StylesheetsService } from "./services/stylesheetsService.js";
 
 class WebSkel {
     constructor() {
@@ -9,6 +10,7 @@ class WebSkel {
         this._documentElement = document;
         this.actionRegistry = {};
         this.registerListeners();
+        this.StyleSheetsService = new StylesheetsService();
         window.showApplicationError = async(title, message, technical)=> {
             await showModal(webSkel._appContent, "show-error-modal",{presenter:"show-error-modal", title: title, message: message, technical: technical});
         }
@@ -218,7 +220,7 @@ class WebSkel {
         return result;
     }
 
-    defineComponent = async (componentName, templatePath) => {
+    defineComponent = async (componentName, templatePath,cssPaths) => {
         let template = await (await fetch(templatePath)).text();
         customElements.define(
             componentName,
@@ -235,6 +237,9 @@ class WebSkel {
                 }
 
                 async connectedCallback() {
+                    if(cssPaths) {
+                        await webSkel.StyleSheetsService.loadStyleSheets(cssPaths);
+                    }
                     let self = this;
                     Array.from(self.attributes).forEach((attr) => {
                         if(typeof self.variables[attr.nodeName]) {
@@ -256,10 +261,14 @@ class WebSkel {
                             self.webSkelPresenter = window.webSkel.initialisePresenter(attr.nodeValue, self, invalidate);
                             self.webSkelPresenter.invalidate = invalidate;
                         }
+
                     });
                     if(!self.webSkelPresenter) {
                         self.refresh();
                     }
+                }
+                async disconnectedCallback() {
+                    await webSkel.StyleSheetsService.unloadStyleSheets(cssPaths);
                 }
 
                 refresh() {
