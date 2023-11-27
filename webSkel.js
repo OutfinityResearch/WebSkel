@@ -1,6 +1,6 @@
-import { findDoubleDollarWords, createTemplateArray } from "./utils/template-utils.js";
-import { showModal } from "./utils/modal-utils.js";
-import { StylesheetsService } from "./services/stylesheetsService.js";
+import {findDoubleDollarWords, createTemplateArray} from "./utils/template-utils.js";
+import {showModal} from "./utils/modal-utils.js";
+import {StylesheetsService} from "./services/stylesheetsService.js";
 
 class WebSkel {
     constructor() {
@@ -11,11 +11,17 @@ class WebSkel {
         this.actionRegistry = {};
         this.registerListeners();
         this.StyleSheetsService = new StylesheetsService();
-        window.showApplicationError = async(title, message, technical)=> {
-            await showModal(webSkel._appContent, "show-error-modal",{presenter:"show-error-modal", title: title, message: message, technical: technical});
+        window.showApplicationError = async (title, message, technical) => {
+            await showModal(webSkel._appContent, "show-error-modal", {
+                presenter: "show-error-modal",
+                title: title,
+                message: message,
+                technical: technical
+            });
         }
         console.log("creating new app manager instance");
     }
+
     registerPresenter(name, instance) {
         this.presentersRegistry[name] = instance;
     }
@@ -24,15 +30,15 @@ class WebSkel {
         let presenter;
         try {
             presenter = new this.presentersRegistry[presenterName](component, invalidate);
-        } catch(e) {
-            showApplicationError(`No presenter ${presenterName} found.`,`No presenter ${presenterName} found.`,`No presenter ${presenterName} found.`);
+        } catch (e) {
+            showApplicationError(`No presenter ${presenterName} found.`, `No presenter ${presenterName} found.`, `No presenter ${presenterName} found.`);
             console.log(`No presenter ${presenterName} found. ${e}`);
             return undefined;
         }
         return presenter;
     }
 
-   initialiseService(serviceName, instance){
+    initialiseService(serviceName, instance) {
         this.servicesRegistry[serviceName] = new instance;
     }
 
@@ -42,9 +48,9 @@ class WebSkel {
 
     async showLoading(element) {
         const loading = document.createElement("dialog");
-        if(!element){
+        if (!element) {
             loading.classList.add("spinner");
-        }else {
+        } else {
             loading.insertAdjacentHTML("afterbegin", element);
         }
         document.body.appendChild(loading);
@@ -55,14 +61,14 @@ class WebSkel {
     /* without server request */
     async changeToDynamicPage(pageHtmlTagName, url, dataPresenterParams, skipHistoryState) {
         const loading = await this.showLoading();
-        let attributesStringPresenter='';
-        if(!this.presentersRegistry.hasOwnProperty(pageHtmlTagName)){
+        let attributesStringPresenter = '';
+        if (!this.presentersRegistry.hasOwnProperty(pageHtmlTagName)) {
             await showApplicationError("Page doesn't exist!", `Page '${pageHtmlTagName}' doesn't exist!`, `Page with presenter name: '${pageHtmlTagName}' doesn't exist in presenterRegistry`);
             loading.close();
             loading.remove();
             return
         }
-        if(dataPresenterParams)
+        if (dataPresenterParams)
             attributesStringPresenter = Object.entries(dataPresenterParams).map(([key, value]) => `data-${key}="${value}"`).join(' ');
         try {
             const result = `<${pageHtmlTagName} data-presenter="${pageHtmlTagName}" ${attributesStringPresenter}></${pageHtmlTagName}>`;
@@ -130,42 +136,42 @@ class WebSkel {
 
         // register listener for data-action attribute
         this._documentElement.addEventListener("click", async (event) => {
-            let target= event.target;
+            let target = event.target;
             let stopPropagation = false;
             while (target && target !== this._documentElement && !stopPropagation) {
                 if (target.hasAttribute("data-local-action")) {
                     event.preventDefault();
                     event.stopPropagation();
                     stopPropagation = true;
-                    let currentCustomElement= target;
-                    while(currentCustomElement.webSkelPresenter === undefined) {
+                    let currentCustomElement = target;
+                    while (currentCustomElement.webSkelPresenter === undefined) {
                         currentCustomElement = currentCustomElement.parentElement;
-                        if(currentCustomElement === document) {
+                        if (currentCustomElement === document) {
                             currentCustomElement = undefined;
                             break;
                         }
                     }
-                    if(currentCustomElement !== undefined){
+                    if (currentCustomElement !== undefined) {
                         const action = target.getAttribute("data-local-action");
                         const [actionName, ...actionParams] = action.split(" ");
                         let p = currentCustomElement.webSkelPresenter;
                         p = Object.getPrototypeOf(p);
-                        if(p[actionName] === undefined) {
-                            await showApplicationError("Button has no Action","There is no action for the button to execute",`Presenter missing ${actionName} method`);
+                        if (p[actionName] === undefined) {
+                            await showApplicationError("Button has no Action", "There is no action for the button to execute", `Presenter missing ${actionName} method`);
                             console.error("No action for the button to execute");
                         } else {
                             try {
                                 currentCustomElement.webSkelPresenter[actionName](target, ...actionParams);
-                            } catch(error) {
+                            } catch (error) {
                                 console.error(error);
-                                await showApplicationError("Error executing action","There is no action for the button to execute",`Encountered ${error}`);
+                                await showApplicationError("Error executing action", "There is no action for the button to execute", `Encountered ${error}`);
                             }
                         }
                     } else {
                         console.error("No presenter found for the button");
-                        await showApplicationError("Missing Presenter","Encountered an error while executing action","No presenter found for the button");
+                        await showApplicationError("Missing Presenter", "Encountered an error while executing action", "No presenter found for the button");
                     }
-                }else {
+                } else {
                     if (target.hasAttribute("data-action")) {
                         event.preventDefault(); // Cancel the native event
                         event.stopPropagation(); // Don't bubble/capture the event any further
@@ -174,8 +180,7 @@ class WebSkel {
                         const [actionName, ...actionParams] = action.split(" ");
                         if (actionName) {
                             this.callAction(actionName, target, ...actionParams);
-                        }
-                        else {
+                        } else {
                             console.error(`${target} : data action attribute value should not be empty!`);
                         }
                         break;
@@ -203,7 +208,7 @@ class WebSkel {
 
     async fetchTextResult(relativeUrlPath, skipHistoryState) {
         const appBaseUrl = new URL(`${window.location.protocol}//${window.location.host}`);
-        if(relativeUrlPath.startsWith("#")) {
+        if (relativeUrlPath.startsWith("#")) {
             relativeUrlPath = relativeUrlPath.slice(1);
         }
         console.log("Fetching Data from URL: ", appBaseUrl + relativeUrlPath);
@@ -215,12 +220,12 @@ class WebSkel {
         const result = await response.text();
         if (!skipHistoryState) {
             const path = appBaseUrl + "#" + relativeUrlPath; // leave baseUrl for now
-            window.history.pushState({ relativeUrlPath, relativeUrlContent: result }, path.toString(), path);
+            window.history.pushState({relativeUrlPath, relativeUrlContent: result}, path.toString(), path);
         }
         return result;
     }
 
-    defineComponent = async (componentName, templatePath,cssPaths) => {
+    defineComponent = async (componentName, templatePath, cssPaths) => {
         let template = await (await fetch(templatePath)).text();
         customElements.define(
             componentName,
@@ -228,6 +233,7 @@ class WebSkel {
                 constructor() {
                     super();
                     this.variables = {};
+                    this.cssPaths = cssPaths || null;
                     let vars = findDoubleDollarWords(template);
                     vars.forEach((vn) => {
                         vn = vn.slice(2);
@@ -237,43 +243,46 @@ class WebSkel {
                 }
 
                 async connectedCallback() {
-                    if(cssPaths) {
+                    if (this.cssPaths) {
                         await webSkel.StyleSheetsService.loadStyleSheets(cssPaths);
                     }
                     let self = this;
                     Array.from(self.attributes).forEach((attr) => {
-                        if(typeof self.variables[attr.nodeName]) {
+                        if (typeof self.variables[attr.nodeName]) {
                             self.variables[attr.nodeName] = attr.nodeValue;
                         }
-                        if(attr.name === "data-presenter") {
+                        if (attr.name === "data-presenter") {
                             const invalidate = () => {
-                                setTimeout(()=>{
+                                setTimeout(() => {
                                     self.webSkelPresenter.beforeRender();
-                                    for(let vn in self.variables) {
-                                        if(typeof self.webSkelPresenter[vn] !== "undefined") {
+                                    for (let vn in self.variables) {
+                                        if (typeof self.webSkelPresenter[vn] !== "undefined") {
                                             self.variables[vn] = self.webSkelPresenter[vn];
                                         }
                                     }
                                     self.refresh();
                                     self.webSkelPresenter.afterRender?.();
-                                },0);
+                                }, 0);
                             }
                             self.webSkelPresenter = window.webSkel.initialisePresenter(attr.nodeValue, self, invalidate);
                             self.webSkelPresenter.invalidate = invalidate;
                         }
 
                     });
-                    if(!self.webSkelPresenter) {
+                    if (!self.webSkelPresenter) {
                         self.refresh();
                     }
                 }
+
                 async disconnectedCallback() {
-                    await webSkel.StyleSheetsService.unloadStyleSheets(cssPaths);
+                    if (this.cssPaths) {
+                        await webSkel.StyleSheetsService.unloadStyleSheets(this.cssPaths);
+                    }
                 }
 
                 refresh() {
                     let stringHTML = "";
-                    for(let item of this.templateArray) {
+                    for (let item of this.templateArray) {
                         item.startsWith("$$") ? stringHTML += this.variables[item.slice(2)] : stringHTML += item;
                     }
                     this.innerHTML = stringHTML;
