@@ -1,3 +1,43 @@
+/**
+ * Moves the cursor to the end of the content within an editable HTML element.
+ * This function is highly compatible with various editable elements (e.g., div, span, p)
+ * and supports both modern and legacy browsers. It's optimized to avoid redundant operations,
+ * such as unnecessary refocusing of an already focused element.
+ *
+ * @param {HTMLElement} el - The HTML element to which the cursor will be moved.
+ * If the element is not currently focused, the function will focus it before
+ * proceeding with the cursor movement.
+ *
+ * Usage Example:
+ * moveCursorToEnd(document.getElementById("editableElementId"));
+ *
+ * Note: This function requires the element to be already inserted into the DOM
+ * for accurate execution. It also checks if the element is currently focused to
+ * prevent redundant focusing.
+ */
+export function moveCursorToEnd(el) {
+    if (!el) {
+        console.error("moveCursorToEnd: No element provided");
+        return;
+    }
+    if (document.activeElement !== el) {
+        el.focus();
+    }
+    if (typeof window.getSelection !== "undefined" && typeof document.createRange !== "undefined") {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        range.collapse(false);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+    } else if (typeof document.body.createTextRange !== "undefined") {
+        const textRange = document.body.createTextRange();
+        textRange.moveToElementText(el);
+        textRange.collapse(false);
+        textRange.select();
+    }
+}
+
 export function getClosestParentElement(element, selector, stopSelector) {
     let closestParent = null;
     while (element) {
