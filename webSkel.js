@@ -261,7 +261,12 @@ class WebSkel {
                                         }
                                     }
                                     self.refresh();
-                                    self.webSkelPresenter.afterRender?.();
+                                    /* Temporary quick-fix for fixing other issues - To Be Replaced
+                                    * La runtime in  afterRender-ul componentei web parinte, componenta web copil nu are inca HTML-ul incarcat
+                                    * si nu se pot face operatii legate de HTML-ul ei
+                                    *
+                                    */
+                                    setTimeout(()=>{self.webSkelPresenter.afterRender?.()},0);
                                 }, 0);
                             }
                             self.webSkelPresenter = window.webSkel.initialisePresenter(attr.nodeValue, self, invalidate);
