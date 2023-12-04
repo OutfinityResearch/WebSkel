@@ -172,4 +172,59 @@ export function getMainAppContainer(element) {
     return getClosestParentElement(element, ".app-container");
 }
 
+/**
+ * Retrieves the closest parent element of a specified element that has a designated presenter.
+ * This function offers flexibility to either find any closest parent with a presenter or
+ * specifically target a presenter with a given name. It's an efficient way to traverse
+ * the DOM hierarchy and find relevant presenter elements.
+ *
+ * @param {HTMLElement} element - The starting HTML element from which the search for the closest parent will begin.
+ * @param {string} [presenterName] - The specific name of the presenter to search for. If not provided,
+ * the function will return the nearest parent with any presenter.
+ *
+ * Usage Example:
+ * getClosestParentWithPresenter(document.getElementById("startElement"), "specificPresenterName");
+ * getClosestParentWithPresenter(document.getElementById("startElement"));
+ *
+ * Note: The function relies on the presence of a 'data-presenter' attribute in parent elements
+ * to identify presenter elements. It's designed to work efficiently by leveraging the
+ * getClosestParentElement utility function, ensuring optimal DOM traversal.
+ */
+export function getClosestParentWithPresenter(element, presenterName) {
+    if (!element || !(element instanceof HTMLElement)) {
+        console.error("getClosestParentWithPresenter: Invalid or no element provided");
+        return null;
+    }
+    const selector = presenterName ? `[data-presenter="${presenterName}"]` : "[data-presenter]";
+    return getClosestParentElement(element, selector);
+}
 
+
+/**
+ * Refreshes the specified HTML element by calling the `invalidate` method on its associated webSkelPresenter.
+ * This function is designed to facilitate dynamic updates of web components that are managed by a webSkelPresenter.
+ * It's particularly useful in scenarios where the state or content of a web component needs to be refreshed
+ * without reloading the entire page.
+ *
+ * @param {HTMLElement} element - The HTML element that needs to be refreshed. The element is expected
+ * to be associated with a webSkelPresenter which has the `invalidate` method.
+ *
+ * Usage Example:
+ * refreshElement(document.getElementById("dynamicContent"));
+ *
+ * Note: This function assumes that the provided element has a webSkelPresenter property. It's crucial
+ * that this property exists and has an `invalidate` method. If the element or its presenter is not properly
+ * configured, the function will log an error to the console.
+ */
+export function refreshElement(element) {
+    if (!element || !(element instanceof HTMLElement)) {
+        console.error("refreshElement: Invalid or no element provided");
+        return;
+    }
+
+    if (!element.webSkelPresenter || typeof element.webSkelPresenter.invalidate !== 'function') {
+        console.error("refreshElement: Element does not have a webSkelPresenter with an invalidate method");
+        return;
+    }
+    element.webSkelPresenter.invalidate();
+}
