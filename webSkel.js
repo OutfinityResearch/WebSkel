@@ -144,32 +144,36 @@ class WebSkel {
                     event.stopPropagation();
                     stopPropagation = true;
                     let currentCustomElement = target;
-                    while (currentCustomElement.webSkelPresenter === undefined) {
-                        currentCustomElement = currentCustomElement.parentElement;
-                        if (currentCustomElement === document) {
-                            currentCustomElement = undefined;
-                            break;
+                    let actionHandled = false;
+                    const action = target.getAttribute("data-local-action");
+                    const [actionName, ...actionParams] = action.split(" ");
+                    while (actionHandled === false) {
+                        let presenterFound=false;
+                        /* Urcam in Arborele DOM si cautam un element care are webSkelPresenter */
+                        while (currentCustomElement!==document && presenterFound===false) {
+                            currentCustomElement = currentCustomElement.parentElement;
+                            if(currentCustomElement===document) {
+                                await showApplicationError("Error executing action", "Action not found in any Presenter", "Action not found in any Presenter");
+                                return;
+                            }
+                          if(currentCustomElement.webSkelPresenter) {
+                              presenterFound = true;
+                          }
                         }
-                    }
-                    if (currentCustomElement !== undefined) {
-                        const action = target.getAttribute("data-local-action");
-                        const [actionName, ...actionParams] = action.split(" ");
                         let p = currentCustomElement.webSkelPresenter;
                         p = Object.getPrototypeOf(p);
-                        if (p[actionName] === undefined) {
-                            await showApplicationError("Button has no Action", "There is no action for the button to execute", `Presenter missing ${actionName} method`);
-                            console.error("No action for the button to execute");
-                        } else {
+                        if (p[actionName] !== undefined) {
                             try {
                                 currentCustomElement.webSkelPresenter[actionName](target, ...actionParams);
+                                actionHandled = true;
                             } catch (error) {
                                 console.error(error);
                                 await showApplicationError("Error executing action", "There is no action for the button to execute", `Encountered ${error}`);
+                                return;
                             }
+                        }else{
+                            presenterFound=false;
                         }
-                    } else {
-                        console.error("No presenter found for the button");
-                        await showApplicationError("Missing Presenter", "Encountered an error while executing action", "No presenter found for the button");
                     }
                 } else {
                     if (target.hasAttribute("data-action")) {
@@ -266,7 +270,9 @@ class WebSkel {
                                     * si nu se pot face operatii legate de HTML-ul ei
                                     *
                                     */
-                                    setTimeout(()=>{self.webSkelPresenter.afterRender?.()},0);
+                                    setTimeout(() => {
+                                        self.webSkelPresenter.afterRender?.()
+                                    }, 0);
                                 }, 0);
                             }
                             self.webSkelPresenter = window.webSkel.initialisePresenter(attr.nodeValue, self, invalidate);
