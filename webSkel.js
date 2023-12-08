@@ -9,6 +9,7 @@ class WebSkel {
         this.servicesRegistry = {};
         this._documentElement = document;
         this.actionRegistry = {};
+        this.applications = [];
         this.registerListeners();
         this.StyleSheetsService = new StylesheetsService();
         window.showApplicationError = async (title, message, technical) => {
@@ -25,7 +26,9 @@ class WebSkel {
     registerPresenter(name, instance) {
         this.presentersRegistry[name] = instance;
     }
-
+    getApplications(){
+        return this.applications;
+    }
     initialisePresenter(presenterName, component, invalidate) {
         let presenter;
         try {
