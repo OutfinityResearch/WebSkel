@@ -56,11 +56,12 @@ export async function extractFormInformation(element, conditions) {
             element
         };
         let inputBorderElem = document.querySelector(`[data-id = '${element.getAttribute("id")}' ]`);
-        if(!isValid) {
-            inputBorderElem.classList.add("input-invalid");
-        }
-        else {
-            inputBorderElem.classList.remove("input-invalid");
+        if(inputBorderElem) {
+            if (!isValid) {
+                inputBorderElem.classList.add("input-invalid");
+            } else {
+                inputBorderElem.classList.remove("input-invalid");
+            }
         }
     }
     if(!form.checkValidity()) {
