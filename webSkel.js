@@ -29,6 +29,9 @@ class WebSkel {
     getApplications(){
         return this.applications;
     }
+    getApplicationData(applicationId){
+        return this.applications.find(application=>application.id===applicationId);
+    }
     initialisePresenter(presenterName, component, invalidate) {
         let presenter;
         try {
