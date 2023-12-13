@@ -39,33 +39,72 @@ export function createTemplateArray(str) {
 }
 
 /**
- * Converts an SVG string to its Base64 encoded equivalent.
- * This function is intended for use in a browser environment.
+ * Encodes a given string to its Base64 encoded equivalent.
+ * This function is intended for use in a browser environment and can handle
+ * any textual data, including SVG, HTML, or plain text.
  *
- * The Base64 encoded SVG can be used for embedding directly into HTML
- * or CSS, which is useful for inline images or background images.
+ * The Base64 encoded data can be used for embedding directly into HTML, CSS,
+ * or for other purposes where Base64 encoding is needed.
  *
- * @param {string} svgString - A string containing valid SVG markup.
- * @returns {string} The Base64 encoded SVG string prefixed with the
- *                   necessary data URI scheme for SVG.
+ * @param {string} dataString - A string containing the data to be encoded.
+ * @param {string} mimeType - The MIME type of the data (e.g., 'image/svg+xml').
+ * @returns {string} The Base64 encoded string prefixed with the necessary
+ *                   data URI scheme for the given MIME type.
  *
  * @example
  * const svgString = `<svg xmlns="http://www.w3.org/2000/svg" ...>...</svg>`;
- * const base64EncodedSVG = svgToBase64(svgString);
+ * const base64EncodedSVG = encodeToBase64(svgString, 'image/svg+xml');
  * // Use base64EncodedSVG in an <img> tag or as a CSS background
+ *
+ * @example
+ * const plainText = 'Hello, World!';
+ * const base64EncodedText = encodeToBase64(plainText, 'text/plain');
+ * // Use base64EncodedText where Base64 encoded text is needed
  */
-function svgToBase64(svgString) {
-    // Check if the input is a non-empty string
-    if (typeof svgString !== 'string' || svgString.trim() === '') {
-        throw new Error('svgToBase64 function expects a non-empty string.');
+export function encodeToBase64(dataString, mimeType) {
+    if (typeof dataString !== 'string' || dataString.trim() === '') {
+        throw new Error('Input data must be a non-empty string.');
+    }
+
+    if (typeof mimeType !== 'string' || mimeType.trim() === '') {
+        throw new Error('MIME type must be a non-empty string.');
     }
 
     try {
-        // Encode the SVG string to Base64 and prepend the data URI scheme
-        return 'data:image/svg+xml;base64,' + window.btoa(svgString);
+        return `data:${mimeType};base64,` + window.btoa(dataString);
     } catch (error) {
-        // Handle potential errors (like invalid characters) during encoding
-        console.error('Error encoding SVG to Base64:', error);
-        throw new Error('Failed to encode SVG to Base64.');
+        console.error('Error encoding data to Base64:', error);
+        throw new Error('Failed to encode data to Base64.');
+    }
+}
+
+
+/**
+ * Decodes a Base64 encoded string.
+ * This function can decode any data that has been encoded in Base64 format,
+ * making it versatile for various types of data (e.g., SVG, images, text).
+ *
+ * Note: The input should be a Base64 encoded string, typically
+ * in the format of a Data URL (e.g., 'data:image/png;base64,iVBORw0KG...').
+ *
+ * @param {string} base64EncodedData - The Base64 encoded string to be decoded.
+ * @returns {string} The decoded string.
+ * @throws {Error} Throws an error if the input is not a string or if decoding fails.
+ */
+export function decodeBase64(base64EncodedData) {
+    if (typeof base64EncodedData !== 'string') {
+        throw new Error('Input must be a Base64 encoded string.');
+    }
+
+    let base64Data = base64EncodedData.split(',')[1];
+    if (!base64Data) {
+        throw new Error('Invalid Base64 data format.');
+    }
+
+    try {
+        return atob(base64Data);
+    } catch (error) {
+        console.error('Error decoding Base64 string:', error);
+        throw new Error('Failed to decode Base64 string.');
     }
 }
