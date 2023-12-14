@@ -10,6 +10,7 @@ class WebSkel {
         this._documentElement = document;
         this.actionRegistry = {};
         this.applications = [];
+        this.initialisedApplications = new Set();
         this.registerListeners();
         this.StyleSheetsService = new StylesheetsService();
         window.showApplicationError = async (title, message, technical) => {
@@ -21,6 +22,31 @@ class WebSkel {
             });
         }
         console.log("creating new app manager instance");
+    }
+    async initialiseApplication(applicationId,applicationName){
+        const applicationConfigs= await fetch(`/space/${webSkel.currentUser.space.id}/applications/${applicationId}/configs`);
+        this.initialisedApplications[applicationId]=await applicationConfigs.json();
+        const components=this.initialisedApplications[applicationId].components;
+        for (const component of components) {
+            if(component.name==="index"){
+                this.initialisedApplications[applicationId].entryPoint=component;
+            }
+            if(component.presenter){
+                const presenterPath = `/app/${webSkel.currentUser.space.id}/applications/${applicationName}/${component.presenter}`;
+                const PresenterModule = await import(presenterPath);
+                webSkel.registerPresenter(component.name, PresenterModule[component.presenter.className]);
+            }
+            const cssFullPaths = component.cssPaths.map(cssPath => `${applicationFolderPath}/${cssPath}`);
+            await webSkel.defineComponent(component.name, `${applicationFolderPath}/${component.path}/${component.name}.html`, cssFullPaths);
+        }
+    }
+
+    async startApplication(applicationId){
+        applicationId=parseInt(applicationId);
+        const applicationData=webSkel.getApplicationData(applicationId);
+        let applicationName=applicationData.name;
+        await this.initialiseApplication(applicationId,applicationName);
+        this.changeToDynamicPage()
     }
 
     registerPresenter(name, instance) {
