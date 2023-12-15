@@ -1,6 +1,7 @@
 import {findDoubleDollarWords, createTemplateArray} from "./utils/template-utils.js";
 import {showModal} from "./utils/modal-utils.js";
 import {StylesheetsService} from "./services/stylesheetsService.js";
+import {UtilsService} from "./services/utilsService.js";
 
 class WebSkel {
     constructor() {
@@ -13,6 +14,7 @@ class WebSkel {
         this.initialisedApplications = new Set();
         this.registerListeners();
         this.StyleSheetsService = new StylesheetsService();
+        this.UtilsService = new UtilsService();
         window.showApplicationError = async (title, message, technical) => {
             await showModal(webSkel._appContent, "show-error-modal", {
                 presenter: "show-error-modal",
@@ -23,41 +25,41 @@ class WebSkel {
         }
         console.log("creating new app manager instance");
     }
-    async initialiseApplication(applicationId,applicationName){
-        const applicationConfigs= await fetch(`/space/${webSkel.currentUser.space.id}/applications/${applicationId}/configs`);
-        this.initialisedApplications[applicationId]=await applicationConfigs.json();
-        const components=this.initialisedApplications[applicationId].components;
-        for (const component of components) {
-            if(component.name==="index"){
-                this.initialisedApplications[applicationId].entryPoint=component;
-            }
-            if(component.presenter){
-                const presenterPath = `/app/${webSkel.currentUser.space.id}/applications/${applicationName}/${component.presenter}`;
-                const PresenterModule = await import(presenterPath);
-                webSkel.registerPresenter(component.name, PresenterModule[component.presenter.className]);
-            }
-            const cssFullPaths = component.cssPaths.map(cssPath => `${applicationFolderPath}/${cssPath}`);
-            await webSkel.defineComponent(component.name, `${applicationFolderPath}/${component.path}/${component.name}.html`, cssFullPaths);
+
+    async initialiseApplication(applicationId) {
+        const applicationConfigs = await fetch(`/space/${webSkel.currentUser.space.id}/applications/${applicationId}/configs`);
+        this.initialisedApplications[applicationId] = await applicationConfigs.json();
+        let applicationResourcesEndpoint = `/app/${webSkel.currentUser.space.id}/applications/${applicationId}`;
+
+        for (const component of this.initialisedApplications[applicationId].components) {
+            let componentHTML = await (await fetch(`${applicationResourcesEndpoint}/${component.componentPath}`)).text();
+            const cssPaths = await Promise.all(component.cssPaths.map(async cssPath => (await fetch(`${applicationResourcesEndpoint}/${cssPath}`)).text()));
+            await webSkel.defineComponent(component.componentName, componentHTML, cssPaths, true);
+        }
+        for (const presenter of this.initialisedApplications[applicationId].presenters) {
+            const PresenterModule = await import(`${applicationResourcesEndpoint}/${presenter.presenterPath}`);
+            webSkel.registerPresenter(presenter.forComponent, PresenterModule[presenter.presenterName]);
         }
     }
-
-    async startApplication(applicationId){
-        applicationId=parseInt(applicationId);
-        const applicationData=webSkel.getApplicationData(applicationId);
-        let applicationName=applicationData.name;
-        await this.initialiseApplication(applicationId,applicationName);
-        this.changeToDynamicPage()
+    async startApplication(applicationId) {
+        if (!this.initialisedApplications[applicationId]) {
+            await this.initialiseApplication(applicationId);
+        }
+        await this.changeToDynamicPage(this.initialisedApplications[applicationId].entryPointComponent, this.initialisedApplications[applicationId].entryPointComponent);
     }
 
     registerPresenter(name, instance) {
         this.presentersRegistry[name] = instance;
     }
-    getApplications(){
+
+    getApplications() {
         return this.applications;
     }
-    getApplicationData(applicationId){
-        return this.applications.find(application=>application.id===applicationId);
+
+    getApplicationData(applicationId) {
+        return this.applications.find(application => application.id === applicationId);
     }
+
     initialisePresenter(presenterName, component, invalidate) {
         let presenter;
         try {
@@ -180,17 +182,17 @@ class WebSkel {
                     const action = target.getAttribute("data-local-action");
                     const [actionName, ...actionParams] = action.split(" ");
                     while (actionHandled === false) {
-                        let presenterFound=false;
+                        let presenterFound = false;
                         /* Urcam in Arborele DOM si cautam un element care are webSkelPresenter */
-                        while (currentCustomElement!==document && presenterFound===false) {
+                        while (currentCustomElement !== document && presenterFound === false) {
                             currentCustomElement = currentCustomElement.parentElement;
-                            if(currentCustomElement===document) {
+                            if (currentCustomElement === document) {
                                 await showApplicationError("Error executing action", "Action not found in any Presenter", "Action not found in any Presenter");
                                 return;
                             }
-                          if(currentCustomElement.webSkelPresenter) {
-                              presenterFound = true;
-                          }
+                            if (currentCustomElement.webSkelPresenter) {
+                                presenterFound = true;
+                            }
                         }
                         let p = currentCustomElement.webSkelPresenter;
                         p = Object.getPrototypeOf(p);
@@ -203,8 +205,8 @@ class WebSkel {
                                 await showApplicationError("Error executing action", "There is no action for the button to execute", `Encountered ${error}`);
                                 return;
                             }
-                        }else{
-                            presenterFound=false;
+                        } else {
+                            presenterFound = false;
                         }
                     }
                 } else {
@@ -261,8 +263,9 @@ class WebSkel {
         return result;
     }
 
-    defineComponent = async (componentName, templatePath, cssPaths) => {
-        let template = await (await fetch(templatePath)).text();
+    defineComponent = async (componentName, templatePath, cssPaths, appComponent) => {
+        let template = "";
+        appComponent ? template = templatePath : template = await (await fetch(templatePath)).text();
         customElements.define(
             componentName,
             class extends HTMLElement {
@@ -270,6 +273,7 @@ class WebSkel {
                     super();
                     this.variables = {};
                     this.cssPaths = cssPaths || null;
+                    this.appComponent = appComponent || null;
                     let vars = findDoubleDollarWords(template);
                     vars.forEach((vn) => {
                         vn = vn.slice(2);
@@ -280,7 +284,7 @@ class WebSkel {
 
                 async connectedCallback() {
                     if (this.cssPaths) {
-                        await webSkel.StyleSheetsService.loadStyleSheets(cssPaths);
+                        await webSkel.StyleSheetsService.loadStyleSheets(cssPaths, this.appComponent);
                     }
                     let self = this;
                     Array.from(self.attributes).forEach((attr) => {
@@ -300,7 +304,7 @@ class WebSkel {
                                     /* Temporary quick-fix for fixing other issues - To Be Replaced
                                     * La runtime in  afterRender-ul componentei web parinte, componenta web copil nu are inca HTML-ul incarcat
                                     * si nu se pot face operatii legate de HTML-ul ei
-                                    *
+                                    * nu a fost testat la mult nesting de componente web
                                     */
                                     setTimeout(() => {
                                         self.webSkelPresenter.afterRender?.()
@@ -319,7 +323,7 @@ class WebSkel {
 
                 async disconnectedCallback() {
                     if (this.cssPaths) {
-                        await webSkel.StyleSheetsService.unloadStyleSheets(this.cssPaths);
+                        await webSkel.StyleSheetsService.unloadStyleSheets(this.cssPaths, this.appComponent);
                     }
                 }
 

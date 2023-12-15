@@ -3,39 +3,61 @@ export class StylesheetsService {
         this.loadedStyleSheets = new Map();
     }
 
-    async loadStyleSheet(href) {
+    async loadStyleSheet(href, appComponent) {
         let refCount = this.loadedStyleSheets.get(href) || 0;
         if (refCount === 0) {
             await new Promise((resolve, reject) => {
-                const link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.href = href;
-                link.onload = () => resolve();
-                link.onerror = () => reject(new Error(`Failed to load the CSS file: ${href}`));
-                document.head.appendChild(link);
+                if (!appComponent) {
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = href;
+                    link.onload = () => resolve();
+                    link.onerror = () => reject(new Error(`Failed to load the CSS file: ${href}`));
+                    document.head.appendChild(link);
+                } else {
+                    try {
+                        const style = document.createElement('style');
+                        style.textContent = href;
+                        document.head.appendChild(style);
+                        resolve();
+                    } catch (error) {
+                        reject(new Error(`Failed to inject the CSS text: ${error}`));
+                    }
+                }
             });
         }
         this.loadedStyleSheets.set(href, refCount + 1);
     }
 
-    unloadStyleSheet(href) {
+    unloadStyleSheet(href, appComponent) {
         let refCount = this.loadedStyleSheets.get(href) || 0;
         if (refCount > 1) {
             this.loadedStyleSheets.set(href, refCount - 1);
         } else if (refCount === 1) {
-            const link = document.head.querySelector(`link[href="${href}"]`);
-            if (link) {
-                document.head.removeChild(link);
+            let element;
+            if (!appComponent) {
+                element = document.head.querySelector(`link[href="${href}"]`);
+            } else {
+                const styles = document.head.querySelectorAll('style');
+                for (let style of styles) {
+                    if (style.textContent === href) {
+                        element = style;
+                        break;
+                    }
+                }
+            }
+            if (element) {
+                document.head.removeChild(element);
             }
             this.loadedStyleSheets.delete(href);
         }
     }
 
-    async loadStyleSheets(hrefArray) {
-        await Promise.all(hrefArray.map(href => this.loadStyleSheet(href)));
+    async loadStyleSheets(hrefArray, appComponent) {
+        await Promise.all(hrefArray.map(href => this.loadStyleSheet(href, appComponent)));
     }
 
-    async unloadStyleSheets(hrefArray) {
-        hrefArray.forEach(href => this.unloadStyleSheet(href));
+    async unloadStyleSheets(hrefArray, appComponent) {
+        hrefArray.forEach(href => this.unloadStyleSheet(href, appComponent));
     }
 }
