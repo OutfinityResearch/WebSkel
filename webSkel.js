@@ -41,6 +41,7 @@ class WebSkel {
             webSkel.registerPresenter(presenter.forComponent, PresenterModule[presenter.presenterName]);
         }
     }
+
     async startApplication(applicationId) {
         if (!this.initialisedApplications[applicationId]) {
             await this.initialiseApplication(applicationId);
@@ -264,79 +265,81 @@ class WebSkel {
     }
 
     defineComponent = async (componentName, templatePath, cssPaths, appComponent) => {
-        let template = "";
-        appComponent ? template = templatePath : template = await (await fetch(templatePath)).text();
-        customElements.define(
-            componentName,
-            class extends HTMLElement {
-                constructor() {
-                    super();
-                    this.variables = {};
-                    this.cssPaths = cssPaths || null;
-                    this.appComponent = appComponent || null;
-                    let vars = findDoubleDollarWords(template);
-                    vars.forEach((vn) => {
-                        vn = vn.slice(2);
-                        this.variables[vn] = "";
-                    });
-                    this.templateArray = createTemplateArray(template);
-                }
-
-                async connectedCallback() {
-                    if (this.cssPaths) {
-                        await webSkel.StyleSheetsService.loadStyleSheets(cssPaths, this.appComponent);
+        if (!customElements.get(componentName)) {
+            let template = "";
+            appComponent ? template = templatePath : template = await (await fetch(templatePath)).text();
+            customElements.define(
+                componentName,
+                class extends HTMLElement {
+                    constructor() {
+                        super();
+                        this.variables = {};
+                        this.cssPaths = cssPaths || null;
+                        this.appComponent = appComponent || null;
+                        let vars = findDoubleDollarWords(template);
+                        vars.forEach((vn) => {
+                            vn = vn.slice(2);
+                            this.variables[vn] = "";
+                        });
+                        this.templateArray = createTemplateArray(template);
                     }
-                    let self = this;
-                    Array.from(self.attributes).forEach((attr) => {
-                        if (typeof self.variables[attr.nodeName]) {
-                            self.variables[attr.nodeName] = attr.nodeValue;
+
+                    async connectedCallback() {
+                        if (this.cssPaths) {
+                            await webSkel.StyleSheetsService.loadStyleSheets(cssPaths, this.appComponent);
                         }
-                        if (attr.name === "data-presenter") {
-                            const invalidate = () => {
-                                setTimeout(() => {
-                                    self.webSkelPresenter.beforeRender();
-                                    for (let vn in self.variables) {
-                                        if (typeof self.webSkelPresenter[vn] !== "undefined") {
-                                            self.variables[vn] = self.webSkelPresenter[vn];
-                                        }
-                                    }
-                                    self.refresh();
-                                    /* Temporary quick-fix for fixing other issues - To Be Replaced
-                                    * La runtime in  afterRender-ul componentei web parinte, componenta web copil nu are inca HTML-ul incarcat
-                                    * si nu se pot face operatii legate de HTML-ul ei
-                                    * nu a fost testat la mult nesting de componente web
-                                    */
-                                    setTimeout(() => {
-                                        self.webSkelPresenter.afterRender?.()
-                                    }, 0);
-                                }, 0);
+                        let self = this;
+                        Array.from(self.attributes).forEach((attr) => {
+                            if (typeof self.variables[attr.nodeName]) {
+                                self.variables[attr.nodeName] = attr.nodeValue;
                             }
-                            self.webSkelPresenter = window.webSkel.initialisePresenter(attr.nodeValue, self, invalidate);
-                            self.webSkelPresenter.invalidate = invalidate;
+                            if (attr.name === "data-presenter") {
+                                const invalidate = () => {
+                                    setTimeout(() => {
+                                        self.webSkelPresenter.beforeRender();
+                                        for (let vn in self.variables) {
+                                            if (typeof self.webSkelPresenter[vn] !== "undefined") {
+                                                self.variables[vn] = self.webSkelPresenter[vn];
+                                            }
+                                        }
+                                        self.refresh();
+                                        /* Temporary quick-fix for fixing other issues - To Be Replaced
+                                        * La runtime in  afterRender-ul componentei web parinte, componenta web copil nu are inca HTML-ul incarcat
+                                        * si nu se pot face operatii legate de HTML-ul ei
+                                        * nu a fost testat la mult nesting de componente web
+                                        */
+                                        setTimeout(() => {
+                                            self.webSkelPresenter.afterRender?.()
+                                        }, 0);
+                                    }, 0);
+                                }
+                                self.webSkelPresenter = window.webSkel.initialisePresenter(attr.nodeValue, self, invalidate);
+                                self.webSkelPresenter.invalidate = invalidate;
+                            }
+
+                        });
+                        if (!self.webSkelPresenter) {
+                            self.refresh();
                         }
+                    }
 
-                    });
-                    if (!self.webSkelPresenter) {
-                        self.refresh();
+                    async disconnectedCallback() {
+                        if (this.cssPaths) {
+                            await webSkel.StyleSheetsService.unloadStyleSheets(this.cssPaths, this.appComponent);
+                        }
+                    }
+
+                    refresh() {
+                        let stringHTML = "";
+                        for (let item of this.templateArray) {
+                            item.startsWith("$$") ? stringHTML += this.variables[item.slice(2)] : stringHTML += item;
+                        }
+                        this.innerHTML = stringHTML;
                     }
                 }
-
-                async disconnectedCallback() {
-                    if (this.cssPaths) {
-                        await webSkel.StyleSheetsService.unloadStyleSheets(this.cssPaths, this.appComponent);
-                    }
-                }
-
-                refresh() {
-                    let stringHTML = "";
-                    for (let item of this.templateArray) {
-                        item.startsWith("$$") ? stringHTML += this.variables[item.slice(2)] : stringHTML += item;
-                    }
-                    this.innerHTML = stringHTML;
-                }
-            }
-        );
-    };
+            );
+        }
+    }
 }
 
 export default WebSkel;
