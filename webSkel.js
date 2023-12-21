@@ -42,11 +42,14 @@ class WebSkel {
         }
     }
 
-    async startApplication(applicationId) {
-        if (!this.initialisedApplications[applicationId]) {
-            await this.initialiseApplication(applicationId);
+    async startApplication(appName) {
+        if(!appName){
+            return;
         }
-        await this.changeToDynamicPage(this.initialisedApplications[applicationId].entryPointComponent, this.initialisedApplications[applicationId].entryPointComponent);
+        if (!this.initialisedApplications[appName]) {
+            await this.initialiseApplication(appName);
+        }
+        await this.changeToDynamicPage(this.initialisedApplications[appName].entryPointComponent, appName + '/' +this.initialisedApplications[appName].entryPointComponent);
     }
 
     registerPresenter(name, instance) {
