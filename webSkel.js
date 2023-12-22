@@ -26,31 +26,6 @@ class WebSkel {
         console.log("creating new app manager instance");
     }
 
-    async initialiseApplication(applicationId) {
-        const applicationConfigs = await fetch(`/space/${webSkel.currentUser.space.id}/applications/${applicationId}/configs`);
-        this.initialisedApplications[applicationId] = await applicationConfigs.json();
-        let applicationResourcesEndpoint = `/app/${webSkel.currentUser.space.id}/applications/${applicationId}`;
-
-        for (const component of this.initialisedApplications[applicationId].components) {
-            let componentHTML = await (await fetch(`${applicationResourcesEndpoint}/${component.componentPath}`)).text();
-            const cssPaths = await Promise.all(component.cssPaths.map(async cssPath => (await fetch(`${applicationResourcesEndpoint}/${cssPath}`)).text()));
-            await webSkel.defineComponent(component.componentName, componentHTML, cssPaths, true);
-        }
-        for (const presenter of this.initialisedApplications[applicationId].presenters) {
-            const PresenterModule = await import(`${applicationResourcesEndpoint}/${presenter.presenterPath}`);
-            webSkel.registerPresenter(presenter.forComponent, PresenterModule[presenter.presenterName]);
-        }
-    }
-
-    async startApplication(appName) {
-        if(!appName){
-            return;
-        }
-        if (!this.initialisedApplications[appName]) {
-            await this.initialiseApplication(appName);
-        }
-        await this.changeToDynamicPage(this.initialisedApplications[appName].entryPointComponent, appName + '/' +this.initialisedApplications[appName].entryPointComponent);
-    }
 
     registerPresenter(name, instance) {
         this.presentersRegistry[name] = instance;
