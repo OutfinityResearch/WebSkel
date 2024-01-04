@@ -30,7 +30,9 @@ class WebSkel {
     registerPresenter(name, instance) {
         this.presentersRegistry[name] = instance;
     }
-
+    registerApplicationService(applicationId,serviceName,instance){
+        this.initialisedApplications[applicationId][serviceName]=new instance;
+    }
     getApplications() {
         return this.applications;
     }
