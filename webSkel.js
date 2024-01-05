@@ -30,9 +30,11 @@ class WebSkel {
     registerPresenter(name, instance) {
         this.presentersRegistry[name] = instance;
     }
-    registerApplicationService(applicationId,serviceName,instance){
-        this.initialisedApplications[applicationId][serviceName]=new instance;
+
+    registerApplicationService(applicationId, serviceName, instance) {
+        this.initialisedApplications[applicationId][serviceName] = new instance;
     }
+
     getApplications() {
         return this.applications;
     }
@@ -46,8 +48,7 @@ class WebSkel {
         try {
             presenter = new this.presentersRegistry[presenterName](component, invalidate);
         } catch (e) {
-            showApplicationError(`No presenter ${presenterName} found.`, `No presenter ${presenterName} found.`, `No presenter ${presenterName} found.`);
-            console.log(`No presenter ${presenterName} found. ${e}`);
+            showApplicationError(`Error creating a presenter instance`, `Encountered an error during the initialization of ${presenterName} for component ${component}`, `${e}`);
             return undefined;
         }
         return presenter;
