@@ -10,8 +10,6 @@ class WebSkel {
         this.servicesRegistry = {};
         this._documentElement = document;
         this.actionRegistry = {};
-        this.applications = [];
-        this.initialisedApplications = new Set();
         this.registerListeners();
         this.StyleSheetsService = new StylesheetsService();
         this.UtilsService = new UtilsService();
@@ -28,18 +26,6 @@ class WebSkel {
 
     registerPresenter(name, instance) {
         this.presentersRegistry[name] = instance;
-    }
-
-    registerApplicationService(applicationId, serviceName, instance) {
-        this.initialisedApplications[applicationId][serviceName] = new instance;
-    }
-
-    getApplications() {
-        return this.applications;
-    }
-
-    getApplicationData(applicationId) {
-        return this.applications.find(application => application.id === applicationId);
     }
 
     initialisePresenter(presenterName, component, invalidate) {
