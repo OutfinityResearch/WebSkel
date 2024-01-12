@@ -26,7 +26,6 @@ class WebSkel {
         console.log("creating new app manager instance");
     }
 
-
     registerPresenter(name, instance) {
         this.presentersRegistry[name] = instance;
     }
@@ -294,10 +293,8 @@ class WebSkel {
                                         }, 0);
                                     }, 0);
                                 }
-                                self.webSkelPresenter = window.webSkel.initialisePresenter(attr.nodeValue, self, invalidate);
-                                self.webSkelPresenter.invalidate = invalidate;
+                                self.webSkelPresenter = webSkel.initialisePresenter(attr.nodeValue, self, invalidate);
                             }
-
                         });
                         if (!self.webSkelPresenter) {
                             self.refresh();
