@@ -260,7 +260,7 @@ class WebSkel {
                                 self.variables[attr.nodeName] = attr.nodeValue;
                             }
                             if (attr.name === "data-presenter") {
-                                const invalidate = () => {
+                                /*const invalidate = () => {
                                     setTimeout(() => {
                                         self.webSkelPresenter.beforeRender();
                                         for (let vn in self.variables) {
@@ -269,15 +269,29 @@ class WebSkel {
                                             }
                                         }
                                         self.refresh();
-                                        /* Temporary quick-fix for fixing other issues - To Be Replaced
+                                         Temporary quick-fix for fixing other issues - To Be Replaced
                                         * La runtime in  afterRender-ul componentei web parinte, componenta web copil nu are inca HTML-ul incarcat
                                         * si nu se pot face operatii legate de HTML-ul ei
                                         * nu a fost testat la mult nesting de componente web
-                                        */
+                                         requestAnimationFrame
                                         setTimeout(() => {
                                             self.webSkelPresenter.afterRender?.()
                                         }, 0);
                                     }, 0);
+                                }*/
+                                const invalidate = () => {
+                                    requestAnimationFrame(() => {
+                                        self.webSkelPresenter.beforeRender();
+                                        for (let vn in self.variables) {
+                                            if (typeof self.webSkelPresenter[vn] !== "undefined") {
+                                                self.variables[vn] = self.webSkelPresenter[vn];
+                                            }
+                                        }
+                                        self.refresh();
+                                       requestAnimationFrame(() => {
+                                            self.webSkelPresenter.afterRender?.()
+                                        });
+                                    });
                                 }
                                 self.webSkelPresenter = webSkel.initialisePresenter(attr.nodeValue, self, invalidate);
                             }
