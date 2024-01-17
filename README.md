@@ -1,12 +1,11 @@
 # WebSkel
 
-WebSkel is a JavaScript-based framework designed to facilitate the development of web applications. It provides a set of utilities and services that help developers to manage and control the behavior of their applications.
-
+WebSkel is a minimal, JavaScript-based framework designed to facilitate the development of web applications using web components. It provides a set of utilities and services that assist developers in managing and controlling the behaviour of their applications. WebSkel implements the MVP (Model-View-Presenter) pattern, enabling developers to create views as web components, presenters in JavaScript, and models as JavaScript objects. The presenter is responsible for populating the view with data from the models.
 ## Features
 
-- **Presenter Registry**: WebSkel maintains a registry of presenters, which are responsible for controlling the behavior of the application's components.
+- **Presenter Registry**: WebSkel maintains a registry of presenters responsible for controlling the behaviour of the application's components.
 
-- **Service Registry**: WebSkel also maintains a registry of services, which are used to perform various operations within the application.
+- **Service Registry**: WebSkel also maintains a registry of services used to perform various operations within the application.
 
 - **Action Registry**: WebSkel provides a mechanism for registering actions, which can be invoked in response to user interactions.
 
@@ -40,7 +39,7 @@ webSkel.changeToDynamicPage("myPage");
 
 ## Configuration
 
-WebSkel can be configured by loading a JSON file that specifies the paths to the presenters, services, and components that should be used by the application. Here is an example of what this configuration file might look like:
+WebSkel can be configured by loading a JSON file that specifies the paths to the presenters, services, and components that the application should use. Here is an example of what this configuration file might look like:
 
 ```json
 {
