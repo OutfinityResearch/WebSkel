@@ -67,7 +67,7 @@ class WebSkel {
             await showApplicationError("Page doesn't exist!", `Page '${pageHtmlTagName}' doesn't exist!`, `Page with presenter name: '${pageHtmlTagName}' doesn't exist in presenterRegistry`);
             loading.close();
             loading.remove();
-            return
+            return;
         }
         if (dataPresenterParams)
             attributesStringPresenter = Object.entries(dataPresenterParams).map(([key, value]) => `data-${key}="${value}"`).join(' ');
@@ -279,19 +279,28 @@ class WebSkel {
                                         }, 0);
                                     }, 0);
                                 }*/
-                                const invalidate = () => {
-                                    requestAnimationFrame(() => {
-                                        self.webSkelPresenter.beforeRender();
-                                        for (let vn in self.variables) {
-                                            if (typeof self.webSkelPresenter[vn] !== "undefined") {
-                                                self.variables[vn] = self.webSkelPresenter[vn];
+                                const invalidate = (loadDataAsyncFunction) => {
+                                    const renderPage = ()=>{
+                                        requestAnimationFrame( () => {
+                                            self.webSkelPresenter.beforeRender();
+                                            for (let vn in self.variables) {
+                                                if (typeof self.webSkelPresenter[vn] !== "undefined") {
+                                                    self.variables[vn] = self.webSkelPresenter[vn];
+                                                }
                                             }
-                                        }
-                                        self.refresh();
-                                       requestAnimationFrame(() => {
-                                            self.webSkelPresenter.afterRender?.()
+                                            self.refresh();
+                                            requestAnimationFrame(() => {
+                                                self.webSkelPresenter.afterRender?.();
+                                            });
                                         });
-                                    });
+                                    };
+                                    if(loadDataAsyncFunction){
+                                        loadDataAsyncFunction().then(()=>{
+                                            renderPage();
+                                        });
+                                    }else {
+                                       renderPage();
+                                    }
                                 }
                                 self.webSkelPresenter = webSkel.initialisePresenter(attr.nodeValue, self, invalidate);
                             }
