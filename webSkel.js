@@ -230,7 +230,7 @@ class WebSkel {
         return result;
     }
 
-    defineComponent = async (componentName, templatePath, cssPaths, appComponent) => {
+    defineComponent = async (componentName, templatePath, cssData, appComponent) => {
         if (!customElements.get(componentName)) {
             let template = "";
             appComponent ? template = templatePath : template = await (await fetch(templatePath)).text();
@@ -240,8 +240,8 @@ class WebSkel {
                     constructor() {
                         super();
                         this.variables = {};
-                        this.cssPaths = cssPaths || null;
-                        this.appComponent = appComponent || null;
+                        this.cssData = cssData|| null;
+                        this.appComponent = componentName;
                         let vars = findDoubleDollarWords(template);
                         vars.forEach((vn) => {
                             vn = vn.slice(2);
@@ -251,8 +251,8 @@ class WebSkel {
                     }
 
                     async connectedCallback() {
-                        if (this.cssPaths) {
-                            await webSkel.StyleSheetsService.loadStyleSheets(cssPaths, this.appComponent);
+                        if (this.cssData) {
+                            await webSkel.StyleSheetsService.loadStyleSheets(this.cssData, this.appComponent);
                         }
                         let self = this;
                         Array.from(self.attributes).forEach((attr) => {
@@ -260,25 +260,6 @@ class WebSkel {
                                 self.variables[attr.nodeName] = attr.nodeValue;
                             }
                             if (attr.name === "data-presenter") {
-                                /*const invalidate = () => {
-                                    setTimeout(() => {
-                                        self.webSkelPresenter.beforeRender();
-                                        for (let vn in self.variables) {
-                                            if (typeof self.webSkelPresenter[vn] !== "undefined") {
-                                                self.variables[vn] = self.webSkelPresenter[vn];
-                                            }
-                                        }
-                                        self.refresh();
-                                         Temporary quick-fix for fixing other issues - To Be Replaced
-                                        * La runtime in  afterRender-ul componentei web parinte, componenta web copil nu are inca HTML-ul incarcat
-                                        * si nu se pot face operatii legate de HTML-ul ei
-                                        * nu a fost testat la mult nesting de componente web
-                                         requestAnimationFrame
-                                        setTimeout(() => {
-                                            self.webSkelPresenter.afterRender?.()
-                                        }, 0);
-                                    }, 0);
-                                }*/
                                 const invalidate = (loadDataAsyncFunction) => {
                                     const renderPage = ()=>{
                                         requestAnimationFrame( () => {
@@ -311,8 +292,8 @@ class WebSkel {
                     }
 
                     async disconnectedCallback() {
-                        if (this.cssPaths) {
-                            await webSkel.StyleSheetsService.unloadStyleSheets(this.cssPaths, this.appComponent);
+                        if (this.cssData) {
+                            await webSkel.StyleSheetsService.unloadStyleSheets(this.appComponent);
                         }
                     }
 
