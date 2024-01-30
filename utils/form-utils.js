@@ -13,7 +13,10 @@ export async function extractFormInformation(element, conditions) {
     const namedElements = [...form.querySelectorAll("[name]:not([type=hidden])")];
     let password = {};
     for (const element of namedElements) {
-
+        if(element.disabled){
+            continue;
+            //skip it
+        }
         if(element.multiple){
             formData.data[element.name] = Array.from(element.selectedOptions).map(option => option.value);
         }else {
