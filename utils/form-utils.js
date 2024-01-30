@@ -70,7 +70,7 @@ export async function extractFormInformation(element, conditions) {
     return formData;
 }
 
-async function imageUpload(file) {
+export async function imageUpload(file) {
     let base64String = "";
     let reader = new FileReader();
     return await new Promise((resolve, reject) => {
