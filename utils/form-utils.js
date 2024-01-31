@@ -17,7 +17,7 @@ export async function extractFormInformation(element, conditions) {
             continue;
             //skip it
         }
-        if(element.multiple){
+        if(element.multiple && element.tagName === "SELECT"){
             formData.data[element.name] = Array.from(element.selectedOptions).map(option => option.value);
         }else {
             formData.data[element.name] = element.tagName === "CHECKBOX" ? element.checked : element.value;
