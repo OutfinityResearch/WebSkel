@@ -25,13 +25,25 @@ function createModal(childTagName, componentProps) {
             componentString +=` data-${componentKey}="${componentProps[componentKey]}"`;
         });
     }
-    componentString === "" ? modal.innerHTML = `<${childTagName}/>`:modal.innerHTML = `<${childTagName}${componentString}/>`;
+    let modalId = webSkel.servicesRegistry.UtilsService.generateNumericID(16);
+    componentString === "" ? modal.innerHTML = `<${childTagName}/>`:modal.innerHTML = `<${childTagName}${componentString} data-modal-id="${modalId}"/>`;
     modal.classList.add("modal");
     return modal;
 }
 
-export function closeModal(element) {
+export function closeModal(element, id, data) {
     const existingModal = getClosestParentElement(element, "dialog");
+    if(id){
+        const customEvent = new CustomEvent(`${id}`, {
+            bubbles: true,
+            cancelable: true,
+            detail: {
+                data:data
+            }
+        });
+        existingModal.firstChild.dispatchEvent(customEvent);
+    }
+
     if (existingModal) {
         existingModal.close();
         existingModal.remove();
