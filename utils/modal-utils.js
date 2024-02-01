@@ -17,33 +17,38 @@ export async function showModal(element, modalComponentName, componentProps) {
     return modal;
 }
 
-function createModal(childTagName, componentProps) {
+export async function showModalForm(element, modalComponentName, componentProps) {
+    let modal = await webSkel.UtilsService.showModal(element, modalComponentName, componentProps);
+
+    return new Promise((resolve, reject)=>{
+        modal.addEventListener("close", (event)=>{
+            resolve(event.data);
+        });
+    });
+
+}
+
+function createModal(childTagName, modalData) {
     let modal = document.createElement("dialog");
     let componentString= "";
-    if(componentProps !== undefined) {
-        Object.keys(componentProps).forEach((componentKey) => {
-            componentString +=` data-${componentKey}="${componentProps[componentKey]}"`;
+    if(modalData !== undefined) {
+        Object.keys(modalData).forEach((componentKey) => {
+            componentString +=` data-${componentKey}="${modalData[componentKey]}"`;
         });
     }
-    let modalId = webSkel.servicesRegistry.UtilsService.generateNumericID(16);
-    componentString === "" ? modal.innerHTML = `<${childTagName}/>`:modal.innerHTML = `<${childTagName}${componentString} data-modal-id="${modalId}"/>`;
+    componentString === "" ? modal.innerHTML = `<${childTagName}/>`:modal.innerHTML = `<${childTagName}${componentString}/>`;
     modal.classList.add("modal");
     return modal;
 }
 
-export function closeModal(element, id, data) {
+export function closeModal(element, data) {
     const existingModal = getClosestParentElement(element, "dialog");
-    if(id){
-        const customEvent = new CustomEvent(`${id}`, {
-            bubbles: true,
-            cancelable: true,
-            detail: {
-                data:data
-            }
-        });
-        existingModal.firstChild.dispatchEvent(customEvent);
+    if(data){
+        let closeEvent = document.createEvent('Event');
+        closeEvent.initEvent('close', true, true);
+        closeEvent.data = data;
+        existingModal.dispatchEvent(closeEvent);
     }
-
     if (existingModal) {
         existingModal.close();
         existingModal.remove();
