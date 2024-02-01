@@ -59,6 +59,14 @@ class WebSkel {
         return loading;
     }
 
+    hideLoading() {
+      let loaderElements = document.querySelectorAll(".spinner");
+      loaderElements.forEach(loader => {
+        loader.close();
+        loader.remove();
+      })
+    }
+
     /* without server request */
     async changeToDynamicPage(pageHtmlTagName, url, dataPresenterParams, skipHistoryState) {
         const loading = await this.showLoading();
