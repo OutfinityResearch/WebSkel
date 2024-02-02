@@ -44,8 +44,10 @@ function createModal(childTagName, modalData) {
 export function closeModal(element, data) {
     const existingModal = getClosestParentElement(element, "dialog");
     if(data){
-        let closeEvent = document.createEvent('Event');
-        closeEvent.initEvent('close', true, true);
+        let closeEvent = new Event('close', {
+            bubbles: true,
+            cancelable: true
+        });
         closeEvent.data = data;
         existingModal.dispatchEvent(closeEvent);
     }
