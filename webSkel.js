@@ -1,4 +1,4 @@
-import {findDoubleDollarWords, createTemplateArray} from "./utils/template-utils.js";
+import {createTemplateArray, findDoubleDollarWords} from "./utils/template-utils.js";
 import {showModal} from "./utils/modal-utils.js";
 import {StylesheetsService} from "./services/stylesheetsService.js";
 import {UtilsService} from "./services/utilsService.js";
