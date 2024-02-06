@@ -93,6 +93,21 @@ export async function imageUpload(file) {
     })
 }
 
+export async function uploadFileAsText(file){
+    let string = "";
+    let reader = new FileReader();
+    return await new Promise((resolve, reject) => {
+        reader.onload = function () {
+            string = reader.result;
+            resolve(string);
+        }
+        if(file) {
+            reader.readAsText(file);
+        } else {
+            reject("No file given as input");
+        }
+    })
+}
 export function checkValidityFormInfo(formInfo) {
     if(!formInfo.isValid) {
         let entries = Object.entries(formInfo.elements);
