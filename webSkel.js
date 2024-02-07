@@ -15,7 +15,7 @@ class WebSkel {
         this.defaultLoader.classList.add("spinner");
         this.defaultLoader.classList.add("spinner-default-style");
         window.showApplicationError = async (title, message, technical) => {
-            await showModal(this._appContent, "show-error-modal", {
+            await showModal("show-error-modal", {
                 presenter: "show-error-modal",
                 title: title,
                 message: message,
