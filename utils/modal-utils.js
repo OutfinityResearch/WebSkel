@@ -1,24 +1,20 @@
-import { getClosestParentElement, getMainAppContainer } from "./dom-utils.js";
+import { getClosestParentElement } from "./dom-utils.js";
 
-export async function showModal(element, modalComponentName, componentProps) {
-    const existingModalContainer = getClosestParentElement(element, "dialog");
+export async function showModal(modalComponentName, componentProps) {
+    const bodyElement = document.querySelector("body");
+    const existingModalContainer = getClosestParentElement(bodyElement, "dialog");
     if (existingModalContainer) {
         existingModalContainer.close();
         existingModalContainer.remove();
     }
-    const modalContainer = element || getMainAppContainer(element);
+
     const modal = Object.assign(createModal(modalComponentName, componentProps), {
         component: modalComponentName,
         cssClass: modalComponentName,
         componentProps
     });
-    modalContainer.appendChild(modal);
+    bodyElement.appendChild(modal);
     await modal.showModal();
-    return modal;
-}
-
-export async function showModalForm(element, modalComponentName, componentProps) {
-    let modal = await webSkel.UtilsService.showModal(element, modalComponentName, componentProps);
 
     return new Promise((resolve, reject)=>{
         modal.addEventListener("close", (event)=>{
@@ -27,7 +23,6 @@ export async function showModalForm(element, modalComponentName, componentProps)
     });
 
 }
-
 function createModal(childTagName, modalData) {
     let modal = document.createElement("dialog");
     let componentString= "";

@@ -3,15 +3,15 @@ export class StylesheetsService {
         this.loadedStyleSheets = new Map();
     }
 
-    async loadStyleSheets(styleSheets, identifier) {
+    async loadStyleSheets(styleSheet, identifier) {
         const loadPromises = [];
 
-        if (styleSheets.urls) {
-            loadPromises.push(...styleSheets.urls.map(url => this.loadStyleSheet({ url:url, identifier:identifier })));
+        if (styleSheet.url) {
+            loadPromises.push(this.loadStyleSheet({ url:styleSheet.url, identifier:identifier }));
         }
 
-        if (styleSheets.cssTexts) {
-            loadPromises.push(...styleSheets.cssTexts.map(cssText => this.loadStyleSheet({ cssText:cssText, identifier:identifier })));
+        if (styleSheet.cssTexts) {
+            loadPromises.push(...styleSheet.cssTexts.map(cssText => this.loadStyleSheet({ cssText:cssText, identifier:identifier })));
         }
 
         await Promise.all(loadPromises);

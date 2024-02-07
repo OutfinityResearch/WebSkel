@@ -1,7 +1,6 @@
 import {createTemplateArray, findDoubleDollarWords} from "./utils/template-utils.js";
 import {showModal} from "./utils/modal-utils.js";
 import {StylesheetsService} from "./services/stylesheetsService.js";
-import {UtilsService} from "./services/utilsService.js";
 
 class WebSkel {
     constructor() {
@@ -12,9 +11,11 @@ class WebSkel {
         this.actionRegistry = {};
         this.registerListeners();
         this.StyleSheetsService = new StylesheetsService();
-        this.UtilsService = new UtilsService();
+        this.defaultLoader = document.createElement("dialog");
+        this.defaultLoader.classList.add("spinner");
+        this.defaultLoader.classList.add("spinner-default-style");
         window.showApplicationError = async (title, message, technical) => {
-            await showModal(webSkel._appContent, "show-error-modal", {
+            await showModal(this._appContent, "show-error-modal", {
                 presenter: "show-error-modal",
                 title: title,
                 message: message,
@@ -23,7 +24,49 @@ class WebSkel {
         }
         console.log("creating new app manager instance");
     }
+    static async initialise(configsPath){
+        let webSkel = new WebSkel();
+        const utilModules = [
+           './utils/dom-utils.js',
+            './utils/form-utils.js',
+            './utils/modal-utils.js',
+            './utils/template-utils.js',
+            './utils/browser-utils.js'
+        ];
+        for (const  path of utilModules) {
+            const moduleExports = await import(path);
+            for (const [fnName, fn] of Object.entries(moduleExports)) {
+                webSkel[fnName] = fn;
+            }
+        }
+        await webSkel.loadConfigs(configsPath);
+        return webSkel;
+    }
+    async loadConfigs(jsonPath) {
+        try {
+            const response = await fetch(jsonPath);
+            const config = await response.json();
+            this.defaultPage = config.defaultPage;
+            for (const service of config.services) {
+                const ServiceModule = await import(service.path);
+                this.initialiseService(service.name, ServiceModule[service.name]);
+            }
+            for (const component of config.components) {
+                let componentPath = `./${config.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.html`;
+                let cssPath = `./${config.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.css`;
+                if(component.presenterClassName){
+                    let presenterPath = `../${config.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.js`;
+                    const PresenterModule = await import(presenterPath);
+                    this.registerPresenter(component.name, PresenterModule[component.presenterClassName]);
+                }
 
+                await this.defineComponent(component.name, componentPath, {url: cssPath});
+            }
+        } catch (error) {
+            console.error(error);
+            await showApplicationError("Error loading configs", "Error loading configs", `Encountered ${error} while trying loading webSkel configs`);
+        }
+    }
     registerPresenter(name, instance) {
         this.presentersRegistry[name] = instance;
     }
@@ -47,16 +90,19 @@ class WebSkel {
         return this.servicesRegistry[name];
     }
 
-    async showLoading(element) {
-        const loading = document.createElement("dialog");
-        if (!element) {
-            loading.classList.add("spinner");
-        } else {
-            loading.insertAdjacentHTML("afterbegin", element);
-        }
-        document.body.appendChild(loading);
-        await loading.showModal();
-        return loading;
+    async showLoading() {
+        document.body.appendChild(this.defaultLoader);
+        await this.defaultLoader.showModal();
+        return this.defaultLoader;
+    }
+    setLoading(stringHTML){
+        this.defaultLoader.innerHTML = stringHTML;
+        this.defaultLoader.classList.remove("spinner-default-style");
+    }
+    resetSpinner(){
+        this.defaultLoader = document.createElement("dialog");
+        this.defaultLoader.classList.add("spinner");
+        this.defaultLoader.classList.add("spinner-default-style");
     }
 
     hideLoading() {
