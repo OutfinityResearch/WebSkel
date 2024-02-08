@@ -18,7 +18,7 @@
  * and the potential for their spoofing. It's advisable to use feature detection in addition
  * to, or instead of, browser detection when possible to ensure broader compatibility and future-proofing.
  */
-export function getBrowser(){
+export function getBrowser() {
     let userAgent = navigator.userAgent, tem,
         M = userAgent.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
     if (/trident/i.test(M[1])) {
@@ -39,3 +39,30 @@ export function getBrowser(){
         name: M[0], version: M[1]
     };
 }
+
+/*
+* returns an object containing all url params
+* */
+export function getURLParams() {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    let result = {}
+    for (let key of urlParams.keys()) {
+        result[key] = urlParams.get(key);
+    }
+
+}
+
+export function getHashParams() {
+    const urlSplitArr = window.location.hash.split("?");
+    let params = {};
+    if (urlSplitArr[1]) {
+        const hashParams = new URLSearchParams(urlSplitArr[1]);
+        for (const [key, value] of hashParams) {
+            params[key] = value;
+        }
+        return params;
+    }
+}
+
+
