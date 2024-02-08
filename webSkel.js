@@ -6,7 +6,7 @@ class WebSkel {
     constructor() {
         this._appContent = {};
         this.presentersRegistry = {};
-        this.servicesRegistry = {};
+        this.appServices = {};
         this._documentElement = document;
         this.actionRegistry = {};
         this.registerListeners();
@@ -82,11 +82,12 @@ class WebSkel {
     }
 
     initialiseService(serviceName, instance) {
-        this.servicesRegistry[serviceName] = new instance;
-    }
-
-    getService(name) {
-        return this.servicesRegistry[name];
+        let service = new instance;
+        const methodNames = Object.getOwnPropertyNames(instance.prototype)
+            .filter(method => method !== 'constructor');
+        methodNames.forEach(methodName => {
+            this.appServices[methodName] = service[methodName].bind(service);
+        });
     }
 
     async showLoading() {
@@ -98,7 +99,7 @@ class WebSkel {
         this.defaultLoader.innerHTML = stringHTML;
         this.defaultLoader.classList.remove("spinner-default-style");
     }
-    resetSpinner(){
+    resetLoading(){
         this.defaultLoader = document.createElement("dialog");
         this.defaultLoader.classList.add("spinner");
         this.defaultLoader.classList.add("spinner-default-style");
@@ -329,8 +330,11 @@ class WebSkel {
                                         });
                                     };
                                     if(loadDataAsyncFunction){
-                                        loadDataAsyncFunction().then(()=>{
-                                            renderPage();
+                                        webSkel.showLoading().then(()=>{
+                                            loadDataAsyncFunction().then(()=>{
+                                                renderPage();
+                                                webSkel.hideLoading();
+                                            });
                                         });
                                     }else {
                                        renderPage();
