@@ -326,6 +326,7 @@ class WebSkel {
                                             self.refresh();
                                             requestAnimationFrame(() => {
                                                 self.webSkelPresenter.afterRender?.();
+                                                webSkel.hideLoading();
                                             });
                                         });
                                     };
@@ -333,7 +334,6 @@ class WebSkel {
                                         webSkel.showLoading().then(()=>{
                                             loadDataAsyncFunction().then(()=>{
                                                 renderPage();
-                                                webSkel.hideLoading();
                                             });
                                         });
                                     }else {
