@@ -95,8 +95,10 @@ export function decodeBase64(base64EncodedData) {
     if (typeof base64EncodedData !== 'string') {
         throw new Error('Input must be a Base64 encoded string.');
     }
+    let splitedArr = base64EncodedData.split(',');
 
-    let base64Data = base64EncodedData.split(',')[1];
+    let base64Data = splitedArr[0].startsWith("data:") ? splitedArr[1] : splitedArr[0];
+
     if (!base64Data) {
         throw new Error('Invalid Base64 data format.');
     }
