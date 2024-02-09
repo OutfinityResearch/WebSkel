@@ -1,6 +1,10 @@
 import { getClosestParentElement } from "./dom-utils.js";
 
-export async function showModal(modalComponentName, componentProps) {
+export async function showModal(modalComponentName, componentProps, waitForData) {
+    if(typeof componentProps === "boolean"){
+        waitForData = componentProps;
+        componentProps = undefined;
+    }
     const bodyElement = document.querySelector("body");
     const existingModalContainer = getClosestParentElement(bodyElement, "dialog");
     if (existingModalContainer) {
@@ -16,12 +20,14 @@ export async function showModal(modalComponentName, componentProps) {
     bodyElement.appendChild(modal);
     await modal.showModal();
 
-    return new Promise((resolve, reject)=>{
-        modal.addEventListener("close", (event)=>{
-            resolve(event.data);
+    if(waitForData){
+        return new Promise((resolve, reject)=>{
+            modal.addEventListener("close", (event)=>{
+                resolve(event.data);
+            });
         });
-    });
-
+    }
+    return modal;
 }
 function createModal(childTagName, modalData) {
     let modal = document.createElement("dialog");
