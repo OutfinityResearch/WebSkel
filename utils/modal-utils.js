@@ -41,7 +41,8 @@ function createModal(childTagName, modalData) {
         componentString += ` data-presenter="${childTagName}"`;
     }
     componentString === "" ? modal.innerHTML = `<${childTagName}/>`:modal.innerHTML = `<${childTagName}${componentString}/>`;
-    modal.classList.add("modal");
+    modal.classList.add("modal", `${childTagName}-dialog`);
+
     return modal;
 }
 
