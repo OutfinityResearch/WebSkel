@@ -63,6 +63,7 @@ export function getHashParams() {
         }
         return params;
     }
+    return params;
 }
 
 
