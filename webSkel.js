@@ -23,7 +23,7 @@ class WebSkel {
         }
         console.log("creating new app manager instance");
     }
-    static async initialise(configsPath,callback){
+    static async initialise(configsPath){
         let webSkel = new WebSkel();
         const utilModules = [
            './utils/dom-utils.js',
@@ -38,10 +38,10 @@ class WebSkel {
                 webSkel[fnName] = fn;
             }
         }
-        await webSkel.loadConfigs(configsPath,webSkel,callback);
+        await webSkel.loadConfigs(configsPath);
         return webSkel;
     }
-    async loadConfigs(jsonPath,webSkel,callback) {
+    async loadConfigs(jsonPath) {
         try {
             const response = await fetch(jsonPath);
             const config = await response.json();
@@ -58,11 +58,7 @@ class WebSkel {
                     const PresenterModule = await import(presenterPath);
                     this.registerPresenter(component.name, PresenterModule[component.presenterClassName]);
                 }
-
                 await this.defineComponent(component.name, componentPath, {url: cssPath});
-            }
-            if(callback!==undefined && typeof callback==="function"){
-               await callback(config,webSkel);
             }
         } catch (error) {
             console.error(error);
