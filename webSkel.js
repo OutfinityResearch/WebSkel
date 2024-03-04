@@ -1,16 +1,15 @@
 import {createTemplateArray, findDoubleDollarWords} from "./utils/template-utils.js";
 import {showModal} from "./utils/modal-utils.js";
-import {StylesheetsService} from "./services/stylesheetsService.js";
+import {ResourceManager} from "./managers/ResourceManager.js";
 
 class WebSkel {
     constructor() {
         this._appContent = {};
-        this.presentersRegistry = {};
         this.appServices = {};
         this._documentElement = document;
         this.actionRegistry = {};
         this.registerListeners();
-        this.StyleSheetsService = new StylesheetsService();
+        this.ResourceManager = new ResourceManager();
         this.defaultLoader = document.createElement("dialog");
         this.defaultLoader.classList.add("spinner");
         this.defaultLoader.classList.add("spinner-default-style");
@@ -23,8 +22,9 @@ class WebSkel {
         }
         console.log("creating new app manager instance");
     }
-    static async initialise(configsPath){
+    static async initialise(configsPath, lazyLoading){
         let webSkel = new WebSkel();
+        webSkel.lazyLoading = lazyLoading;
         const utilModules = [
            './utils/dom-utils.js',
             './utils/form-utils.js',
@@ -45,40 +45,22 @@ class WebSkel {
         try {
             const response = await fetch(jsonPath);
             const config = await response.json();
-            this.defaultPage = config.defaultPage;
+            this.configs = config;
             for (const service of config.services) {
                 const ServiceModule = await import(service.path);
                 this.initialiseService(service.name, ServiceModule[service.name]);
             }
             for (const component of config.components) {
-                let componentPath = `./${config.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.html`;
-                let cssPath = `./${config.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.css`;
-                if(component.presenterClassName){
-                    let presenterPath = `../${config.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.js`;
-                    const PresenterModule = await import(presenterPath);
-                    this.registerPresenter(component.name, PresenterModule[component.presenterClassName]);
-                }
-                await this.defineComponent(component.name, componentPath, {url: cssPath});
+                await this.defineComponent(component);
             }
         } catch (error) {
             console.error(error);
             await showApplicationError("Error loading configs", "Error loading configs", `Encountered ${error} while trying loading webSkel configs`);
         }
     }
-    registerPresenter(name, instance) {
-        this.presentersRegistry[name] = instance;
-    }
 
-    initialisePresenter(presenterName, component, invalidate) {
-        let presenter;
-        try {
-            presenter = new this.presentersRegistry[presenterName](component, invalidate);
-        } catch (e) {
-            showApplicationError(`Error creating a presenter instance`, `Encountered an error during the initialization of ${presenterName} for component ${component}`, `${e}`);
-            return undefined;
-        }
-        return presenter;
-    }
+
+
 
     initialiseService(serviceName, instance) {
         let service = new instance;
@@ -112,16 +94,17 @@ class WebSkel {
       })
     }
 
+
     /* without server request */
     async changeToDynamicPage(pageHtmlTagName, url, dataPresenterParams, skipHistoryState) {
         const loading = await this.showLoading();
         let attributesStringPresenter = '';
-        if (!this.presentersRegistry.hasOwnProperty(pageHtmlTagName)) {
-            await showApplicationError("Page doesn't exist!", `Page '${pageHtmlTagName}' doesn't exist!`, `Page with presenter name: '${pageHtmlTagName}' doesn't exist in presenterRegistry`);
-            loading.close();
-            loading.remove();
-            return;
-        }
+        // if (!this.presentersRegistry.hasOwnProperty(pageHtmlTagName)) {
+        //     await showApplicationError("Page doesn't exist!", `Page '${pageHtmlTagName}' doesn't exist!`, `Page with presenter name: '${pageHtmlTagName}' doesn't exist in presenterRegistry`);
+        //     loading.close();
+        //     loading.remove();
+        //     return;
+        // }
         if (dataPresenterParams)
             attributesStringPresenter = Object.entries(dataPresenterParams).map(([key, value]) => `data-${key}="${value}"`).join(' ');
         try {
@@ -246,7 +229,6 @@ class WebSkel {
 
                 }
                 target = target.parentElement;
-
             }
         });
     }
@@ -283,30 +265,26 @@ class WebSkel {
         return result;
     }
 
-    defineComponent = async (componentName, templatePath, cssData, appComponent) => {
-        if (!customElements.get(componentName)) {
-            let template = "";
-            appComponent ? template = templatePath : template = await (await fetch(templatePath)).text();
+    defineComponent = async (component, loadedTemplate, cssData) => {
+        if (!customElements.get(component.name)) {
             customElements.define(
-                componentName,
+                component.name,
                 class extends HTMLElement {
                     constructor() {
                         super();
                         this.variables = {};
-                        this.cssData = cssData|| null;
-                        this.appComponent = componentName;
-                        let vars = findDoubleDollarWords(template);
+                        this.componentName = component.name;
+                    }
+
+                    async connectedCallback() {
+                        this.resources = await webSkel.ResourceManager.loadComponent(component, loadedTemplate, cssData);
+                        let vars = findDoubleDollarWords(this.resources.html);
                         vars.forEach((vn) => {
                             vn = vn.slice(2);
                             this.variables[vn] = "";
                         });
-                        this.templateArray = createTemplateArray(template);
-                    }
+                        this.templateArray = createTemplateArray(this.resources.html);
 
-                    async connectedCallback() {
-                        if (this.cssData) {
-                            await webSkel.StyleSheetsService.loadStyleSheets(this.cssData, this.appComponent);
-                        }
                         let self = this;
                         Array.from(self.attributes).forEach((attr) => {
                             if (typeof self.variables[attr.nodeName]) {
@@ -339,17 +317,17 @@ class WebSkel {
                                        renderPage();
                                     }
                                 }
-                                self.webSkelPresenter = webSkel.initialisePresenter(attr.nodeValue, self, invalidate);
+                                self.webSkelPresenter = webSkel.ResourceManager.initialisePresenter(attr.nodeValue, self, invalidate);
                             }
                         });
                         if (!self.webSkelPresenter) {
-                            self.refresh();
+                            await self.refresh();
                         }
                     }
 
                     async disconnectedCallback() {
-                        if (this.cssData) {
-                            await webSkel.StyleSheetsService.unloadStyleSheets(this.appComponent);
+                        if (this.resources.css) {
+                            await webSkel.ResourceManager.unloadStyleSheets(this.componentName);
                         }
                     }
 

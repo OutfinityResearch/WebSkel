@@ -37,7 +37,8 @@ function createModal(childTagName, modalData) {
             componentString +=` data-${componentKey}="${modalData[componentKey]}"`;
         });
     }
-    if(webSkel.presentersRegistry[childTagName]){
+    let component = webSkel.configs.components.find(component => component.name === childTagName);
+    if(component.presenterClassName){
         componentString += ` data-presenter="${childTagName}"`;
     }
     componentString === "" ? modal.innerHTML = `<${childTagName}/>`:modal.innerHTML = `<${childTagName}${componentString}/>`;
