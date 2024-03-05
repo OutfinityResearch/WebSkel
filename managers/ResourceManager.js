@@ -90,7 +90,9 @@ export class ResourceManager {
                 }
             })();
         } else if (!this.components[component.name].isPromiseFulfilled) {
-            return this.components[component.name].loadingPromise;
+            let result = await this.components[component.name].loadingPromise;
+            await this.loadStyleSheets(result.css, component.name);
+            return result;
         } else {
             await this.loadStyleSheets(this.components[component.name].css, component.name);
             return {
