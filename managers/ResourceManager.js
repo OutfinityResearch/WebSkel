@@ -6,10 +6,14 @@ export class ResourceManager {
 
     async loadStyleSheets(styleSheet, identifier) {
         const loadPromises = [];
-        loadPromises.push(...styleSheet.map(cssText => this.loadStyleSheet({ cssText:cssText, identifier:identifier })));
+        loadPromises.push(...styleSheet.map(cssText => this.loadStyleSheet({
+            cssText: cssText,
+            identifier: identifier
+        })));
         return (await Promise.all(loadPromises)).join("");
     }
-    async loadStyleSheet({ url = null, cssText = null, identifier = null }) {
+
+    async loadStyleSheet({url = null, cssText = null, identifier = null}) {
         if (!url && !cssText) {
             throw new Error('Either a URL or CSS text must be provided.');
         }
@@ -34,6 +38,7 @@ export class ResourceManager {
             });
         }
     }
+
     async unloadStyleSheets(identifier) {
         let refCount = this.loadedStyleSheets.get(identifier);
         if (refCount !== undefined) {
@@ -46,52 +51,56 @@ export class ResourceManager {
             }
         }
     }
+
     removeStyleSheet(identifier) {
         const styleElements = Array.from(document.head.querySelectorAll(`link[class="${identifier}"], style[class="${identifier}"]`));
         styleElements.forEach(element => document.head.removeChild(element));
     }
 
-    async loadComponent(component, loadedTemplate, loadedCSSs){
-        if(!this.components[component.name]){
+    async loadComponent(component, loadedTemplate, loadedCSSs) {
+        if (!this.components[component.name]) {
             this.components[component.name] = {
                 html: "",
-                css: "",
-                presenter: ""
+                css: [],
+                presenter: null,
+                loadingPromise: null,
+                isPromiseFulfilled: false,
             };
-            let componentPath = `./${webSkel.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.html`;
-            let template = "";
-            loadedTemplate ? template = loadedTemplate : template = await (await fetch(componentPath)).text();
-            this.components[component.name].html = template;
 
-            let css = "";
-            let cssPath = `./${webSkel.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.css`;
-            if(loadedCSSs){
-                css = loadedCSSs;
-            } else {
-                css = await (await fetch(cssPath)).text();
-                css = [css];
-            }
-            this.components[component.name].css = css;
-            await this.loadStyleSheets(css, component.name);
+            return this.components[component.name].loadingPromise = (async () => {
+                try {
+                    const componentPath = `./${webSkel.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.html`;
+                    const template = loadedTemplate || await (await fetch(componentPath)).text();
+                    this.components[component.name].html = template;
 
-            let PresenterModule;
-            if(component.presenterClassName){
-                let presenterPath = `../../${webSkel.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.js`;
-                PresenterModule = await import(presenterPath);
-                this.registerPresenter(component.name, PresenterModule[component.presenterClassName]);
-            }
-            return {
-                html: template,
-                css: css
-            }
+                    const cssPath = `./${webSkel.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.css`;
+                    const css = loadedCSSs || [await (await fetch(cssPath)).text()];
+                    this.components[component.name].css = css;
+                    await this.loadStyleSheets(css, component.name);
+
+                    if (component.presenterClassName) {
+                        const presenterPath = `../../${webSkel.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.js`;
+                        const PresenterModule = await import(presenterPath);
+                        this.registerPresenter(component.name, PresenterModule[component.presenterClassName]);
+                    }
+                    this.components[component.name].isPromiseFulfilled = true;
+                    return { html: template, css: css };
+                } catch (error) {
+                    throw error;
+                }
+            })();
+        } else if (!this.components[component.name].isPromiseFulfilled) {
+            return this.components[component.name].loadingPromise;
         } else {
             await this.loadStyleSheets(this.components[component.name].css, component.name);
             return {
                 html: this.components[component.name].html,
                 css: this.components[component.name].css
-            }
+            };
         }
     }
+
+
     registerPresenter(name, presenterClass) {
         this.components[name].presenter = presenterClass;
     }
