@@ -57,7 +57,7 @@ export class ResourceManager {
         styleElements.forEach(element => document.head.removeChild(element));
     }
 
-    async loadComponent(component, loadedTemplate, loadedCSSs) {
+    async loadComponent(component) {
         if (!this.components[component.name]) {
             this.components[component.name] = {
                 html: "",
@@ -70,11 +70,11 @@ export class ResourceManager {
             return this.components[component.name].loadingPromise = (async () => {
                 try {
                     const componentPath = `./${webSkel.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.html`;
-                    const template = loadedTemplate || await (await fetch(componentPath)).text();
+                    const template = component.loadedTemplate || await (await fetch(componentPath)).text();
                     this.components[component.name].html = template;
 
                     const cssPath = `./${webSkel.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.css`;
-                    const css = loadedCSSs || [await (await fetch(cssPath)).text()];
+                    const css = component.loadedCSSs || [await (await fetch(cssPath)).text()];
                     this.components[component.name].css = css;
                     await this.loadStyleSheets(css, component.name);
 

@@ -265,7 +265,7 @@ class WebSkel {
         return result;
     }
 
-    defineComponent = async (component, loadedTemplate, cssData) => {
+    defineComponent = async (component) => {
         if (!customElements.get(component.name)) {
             customElements.define(
                 component.name,
@@ -277,7 +277,7 @@ class WebSkel {
                     }
 
                     async connectedCallback() {
-                        this.resources = await webSkel.ResourceManager.loadComponent(component, loadedTemplate, cssData);
+                        this.resources = await webSkel.ResourceManager.loadComponent(component);
                         let vars = findDoubleDollarWords(this.resources.html);
                         vars.forEach((vn) => {
                             vn = vn.slice(2);
