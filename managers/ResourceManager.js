@@ -79,9 +79,13 @@ export class ResourceManager {
                     await this.loadStyleSheets(css, component.name);
 
                     if (component.presenterClassName) {
-                        const presenterPath = `../../${webSkel.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.js`;
-                        const PresenterModule = await import(presenterPath);
-                        this.registerPresenter(component.name, PresenterModule[component.presenterClassName]);
+                        if(component.presenterModule){
+                            this.registerPresenter(component.name, component.presenterModule[component.presenterClassName]);
+                        } else {
+                            const presenterPath = `../../${webSkel.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.js`;
+                            const PresenterModule = await import(presenterPath);
+                            this.registerPresenter(component.name, PresenterModule[component.presenterClassName]);
+                        }
                     }
                     this.components[component.name].isPromiseFulfilled = true;
                     return { html: template, css: css };
