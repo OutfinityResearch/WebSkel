@@ -116,7 +116,7 @@ export class ResourceManager {
         try {
             presenter = new this.components[component.componentName].presenter(component, invalidate);
         } catch (e) {
-            showApplicationError(`Error creating a presenter instance`, `Encountered an error during the initialization of ${presenterName} for component ${component}`, `${e}`);
+            showApplicationError(`Error creating a presenter instance`, `Encountered an error during the initialization of ${presenterName} for component: ${component.componentName}`, e + ":"+ e.stack.split('\n')[1]);
             return undefined;
         }
         return presenter;
