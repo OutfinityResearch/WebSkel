@@ -290,29 +290,45 @@ class WebSkel {
                             if (typeof self.variables[attr.nodeName]) {
                                 self.variables[attr.nodeName] = attr.nodeValue;
                             }
+                            const displayError = (e) =>{
+                                self.innerHTML = `Error rendering component: ${self.componentName}\n: ` + e + e.stack.split('\n')[1];
+                                console.error(e);
+                                webSkel.hideLoading();
+                            }
                             if (attr.name === "data-presenter") {
                                 const invalidate = (loadDataAsyncFunction) => {
                                     const renderPage = ()=>{
                                         requestAnimationFrame( () => {
-                                            self.webSkelPresenter.beforeRender();
-                                            for (let vn in self.variables) {
-                                                if (typeof self.webSkelPresenter[vn] !== "undefined") {
-                                                    self.variables[vn] = self.webSkelPresenter[vn];
+                                            try {
+                                                self.webSkelPresenter.beforeRender();
+                                                for (let vn in self.variables) {
+                                                    if (typeof self.webSkelPresenter[vn] !== "undefined") {
+                                                        self.variables[vn] = self.webSkelPresenter[vn];
+                                                    }
                                                 }
+                                                self.refresh();
+                                                requestAnimationFrame(() => {
+                                                    try {
+                                                        self.webSkelPresenter.afterRender?.();
+                                                        webSkel.hideLoading();
+                                                    } catch (e) {
+                                                       displayError(e);
+                                                    }
+                                                });
                                             }
-                                            self.refresh();
-                                            requestAnimationFrame(() => {
-                                                self.webSkelPresenter.afterRender?.();
-                                                webSkel.hideLoading();
-                                            });
+                                        catch (e) {
+                                                displayError(e);
+                                            }
                                         });
                                     };
                                     if(loadDataAsyncFunction){
-                                        webSkel.showLoading().then(()=>{
-                                            loadDataAsyncFunction().then(()=>{
-                                                renderPage();
+                                            webSkel.showLoading().then(()=>{
+                                                    loadDataAsyncFunction().then(()=>{
+                                                        renderPage();
+                                                    }).catch((e) => {
+                                                        displayError(e);
+                                                    });
                                             });
-                                        });
                                     }else {
                                        renderPage();
                                     }
