@@ -60,10 +60,11 @@ export function getClosestParentElement(element, selector, stopSelector) {
  * @param {Element} startElement The DOM element to start the search from.
  * @param {string} targetSelector The CSS selector to match against.
  * @param {string} [stopSelector] An optional CSS selector to specify when to stop traversing.
+ * @param {boolean} [ignoreStartElement] An optional Flag to specify if we ignore the case when the searched element is the startElement
  * @returns {Element|null} The closest matching DOM element, or null if not found.
  * @throws {TypeError} If invalid arguments are provided.
  */
-export function reverseQuerySelector(startElement, targetSelector, stopSelector = null) {
+export function reverseQuerySelector(startElement, targetSelector, stopSelector = "",ignoreStartElement=false) {
     const visited = new Set();
     // Argument validation
     if (!(startElement instanceof Element)) {
@@ -73,7 +74,7 @@ export function reverseQuerySelector(startElement, targetSelector, stopSelector 
         throw new TypeError('The second argument must be a non-empty string.');
     }
     // Check the startElement first
-    if (startElement.matches(targetSelector)) {
+    if (startElement.matches(targetSelector) && !ignoreStartElement) {
         return startElement;
     }
     visited.add(startElement);
@@ -196,9 +197,16 @@ export function getClosestParentWithPresenter(element, presenterName) {
         return null;
     }
     const selector = presenterName ? `[data-presenter="${presenterName}"]` : "[data-presenter]";
-    return getClosestParentElement(element, selector);
+    return reverseQuerySelector(element, selector,"",true);
 }
 
+export function invalidateParentElement(element){
+    if (!element || !(element instanceof HTMLElement)) {
+        console.error("invalidateParentElement: Invalid or no element provided");
+        return null;
+    }
+    refreshElement(getClosestParentWithPresenter(element));
+}
 
 /**
  * Refreshes the specified HTML element by calling the `invalidate` method on its associated webSkelPresenter.
