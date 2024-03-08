@@ -72,8 +72,10 @@ class WebSkel {
     }
 
     async showLoading() {
-        document.body.appendChild(this.defaultLoader);
-        await this.defaultLoader.showModal();
+        if(!this.defaultLoader.open) {
+            document.body.appendChild(this.defaultLoader);
+            await this.defaultLoader.showModal();
+        }
         return this.defaultLoader;
     }
     setLoading(stringHTML){
@@ -284,7 +286,6 @@ class WebSkel {
                             this.variables[vn] = "";
                         });
                         this.templateArray = createTemplateArray(this.resources.html);
-
                         let self = this;
                         Array.from(self.attributes).forEach((attr) => {
                             if (typeof self.variables[attr.nodeName]) {
@@ -295,6 +296,7 @@ class WebSkel {
                                 console.error(e);
                                 webSkel.hideLoading();
                             }
+
                             if (attr.name === "data-presenter") {
                                 const invalidate = (loadDataAsyncFunction) => {
                                     const renderPage = ()=>{
