@@ -72,11 +72,33 @@ class WebSkel {
     }
 
     async showLoading() {
-        if(!this.defaultLoader.open) {
-            document.body.appendChild(this.defaultLoader);
-            await this.defaultLoader.showModal();
+        function generateRandomId(length) {
+            const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let randomId = '';
+            for (let i = 0; i < length; i++) {
+                randomId += charset.charAt(Math.floor(Math.random() * charset.length));
+            }
+            return randomId;
         }
-        return this.defaultLoader;
+        let loader = this.defaultLoader.cloneNode(true);
+        let id = generateRandomId(12);
+        loader.setAttribute("data-id", id)
+        document.body.appendChild(loader);
+        await loader.showModal();
+        return id;
+    }
+    hideLoading(id) {
+        if(id){
+            let loader = document.querySelector(`[data-id = '${id}' ]`);
+            loader.close();
+            loader.remove();
+        }else {
+            let loaderElements = document.querySelectorAll(".spinner");
+            loaderElements.forEach(loader => {
+                loader.close();
+                loader.remove();
+            });
+        }
     }
     setLoading(stringHTML){
         this.defaultLoader.innerHTML = stringHTML;
@@ -87,26 +109,10 @@ class WebSkel {
         this.defaultLoader.classList.add("spinner");
         this.defaultLoader.classList.add("spinner-default-style");
     }
-
-    hideLoading() {
-      let loaderElements = document.querySelectorAll(".spinner");
-      loaderElements.forEach(loader => {
-        loader.close();
-        loader.remove();
-      })
-    }
-
-
     /* without server request */
     async changeToDynamicPage(pageHtmlTagName, url, dataPresenterParams, skipHistoryState) {
-        const loading = await this.showLoading();
+        const id = await this.showLoading();
         let attributesStringPresenter = '';
-        // if (!this.presentersRegistry.hasOwnProperty(pageHtmlTagName)) {
-        //     await showApplicationError("Page doesn't exist!", `Page '${pageHtmlTagName}' doesn't exist!`, `Page with presenter name: '${pageHtmlTagName}' doesn't exist in presenterRegistry`);
-        //     loading.close();
-        //     loading.remove();
-        //     return;
-        // }
         if (dataPresenterParams)
             attributesStringPresenter = Object.entries(dataPresenterParams).map(([key, value]) => `data-${key}="${value}"`).join(' ');
         try {
@@ -119,8 +125,7 @@ class WebSkel {
         } catch (error) {
             console.log("Failed to change page", error);
         } finally {
-            loading.close();
-            loading.remove();
+           this.hideLoading(id);
         }
     }
 
