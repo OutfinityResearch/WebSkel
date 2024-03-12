@@ -64,7 +64,7 @@ export function getClosestParentElement(element, selector, stopSelector) {
  * @returns {Element|null} The closest matching DOM element, or null if not found.
  * @throws {TypeError} If invalid arguments are provided.
  */
-export function reverseQuerySelector(startElement, targetSelector, stopSelector = "",ignoreStartElement=false) {
+export function reverseQuerySelector(startElement, targetSelector, stopSelector = "", ignoreStartElement = false) {
     const visited = new Set();
     // Argument validation
     if (!(startElement instanceof Element)) {
@@ -148,13 +148,16 @@ export function notBasePage(url) {
 }
 
 export function sanitize(str) {
-    return str.replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-        .replace(/\s/g, '&nbsp;');
+    if (str && typeof str === "string") {
+        return str.replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;')
+            .replace(/\s/g, '&nbsp;');
+    }
 }
+
 export function unsanitize(str) {
     if (typeof str !== 'string') {
         throw new TypeError('unsanitize expects a string');
@@ -197,10 +200,10 @@ export function getClosestParentWithPresenter(element, presenterName) {
         return null;
     }
     const selector = presenterName ? `[data-presenter="${presenterName}"]` : "[data-presenter]";
-    return reverseQuerySelector(element, selector,"",true);
+    return reverseQuerySelector(element, selector, "", true);
 }
 
-export function invalidateParentElement(element){
+export function invalidateParentElement(element) {
     if (!element || !(element instanceof HTMLElement)) {
         console.error("invalidateParentElement: Invalid or no element provided");
         return null;
