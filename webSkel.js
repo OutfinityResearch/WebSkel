@@ -131,15 +131,14 @@ class WebSkel {
 
     /* with server request */
     async changeToStaticPage(pageUrl, skipHistoryState) {
-        const loading = await this.showLoading();
+        const loadingId = await this.showLoading();
         try {
             const pageContent = await this.fetchTextResult(pageUrl, skipHistoryState);
             this.updateAppContent(pageContent);
         } catch (error) {
             console.log("Failed to change page", error);
         } finally {
-            loading.close();
-            loading.remove();
+            this.hideLoading(loadingId);
         }
     }
 
