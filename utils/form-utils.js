@@ -108,13 +108,3 @@ export async function uploadFileAsText(file){
         }
     })
 }
-export function checkValidityFormInfo(formInfo) {
-    if(!formInfo.isValid) {
-        let entries = Object.entries(formInfo.elements);
-        for(const entry of entries) {
-
-        }
-        return false;
-    }
-    return true;
-}
