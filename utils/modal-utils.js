@@ -1,4 +1,5 @@
 import { getClosestParentElement } from "./dom-utils.js";
+import WebSkel from "../webSkel.js";
 
 export async function showModal(modalComponentName, componentProps, waitForData) {
     if(typeof componentProps === "boolean"){
@@ -37,7 +38,7 @@ function createModal(childTagName, modalData) {
             componentString +=` data-${componentKey}="${modalData[componentKey]}"`;
         });
     }
-    let component = webSkel.configs.components.find(component => component.name === childTagName);
+    let component = WebSkel.instance.configs.components.find(component => component.name === childTagName);
     if(component.presenterClassName){
         componentString += ` data-presenter="${childTagName}"`;
     }

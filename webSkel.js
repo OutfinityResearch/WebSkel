@@ -22,9 +22,11 @@ class WebSkel {
         }
         console.log("creating new app manager instance");
     }
-    static async initialise(configsPath, lazyLoading){
+    static async initialise(configsPath){
+        if(WebSkel.instance){
+            return WebSkel.instance;
+        }
         let webSkel = new WebSkel();
-        webSkel.lazyLoading = lazyLoading;
         const utilModules = [
            './utils/dom-utils.js',
             './utils/form-utils.js',
@@ -39,7 +41,8 @@ class WebSkel {
             }
         }
         await webSkel.loadConfigs(configsPath);
-        return webSkel;
+        WebSkel.instance = webSkel;
+        return WebSkel.instance;
     }
     async loadConfigs(jsonPath) {
         try {
@@ -48,7 +51,7 @@ class WebSkel {
             this.configs = config;
             for (const service of config.services) {
                 const ServiceModule = await import(service.path);
-                this.initialiseService(service.name, ServiceModule[service.name]);
+                this.initialiseService(ServiceModule[service.name]);
             }
             for (const component of config.components) {
                 await this.defineComponent(component);
@@ -62,7 +65,7 @@ class WebSkel {
 
 
 
-    initialiseService(serviceName, instance) {
+    initialiseService(instance) {
         let service = new instance;
         const methodNames = Object.getOwnPropertyNames(instance.prototype)
             .filter(method => method !== 'constructor');
@@ -283,7 +286,7 @@ class WebSkel {
                     }
 
                     async connectedCallback() {
-                        this.resources = await webSkel.ResourceManager.loadComponent(component);
+                        this.resources = await WebSkel.instance.ResourceManager.loadComponent(component);
                         let vars = findDoubleDollarWords(this.resources.html);
                         vars.forEach((vn) => {
                             vn = vn.slice(2);
@@ -298,7 +301,7 @@ class WebSkel {
                             const displayError = (e) =>{
                                 self.innerHTML = `Error rendering component: ${self.componentName}\n: ` + e + e.stack.split('\n')[1];
                                 console.error(e);
-                                webSkel.hideLoading();
+                                WebSkel.instance.hideLoading();
                             }
 
                             if (attr.name === "data-presenter") {
@@ -316,7 +319,7 @@ class WebSkel {
                                                 requestAnimationFrame(() => {
                                                     try {
                                                         self.webSkelPresenter.afterRender?.();
-                                                        webSkel.hideLoading();
+                                                        WebSkel.instance.hideLoading();
                                                     } catch (e) {
                                                        displayError(e);
                                                     }
@@ -328,7 +331,7 @@ class WebSkel {
                                         });
                                     };
                                     if(loadDataAsyncFunction){
-                                            webSkel.showLoading().then(()=>{
+                                            WebSkel.instance.showLoading().then(()=>{
                                                     loadDataAsyncFunction().then(()=>{
                                                         renderPage();
                                                     }).catch((e) => {
@@ -339,7 +342,7 @@ class WebSkel {
                                        renderPage();
                                     }
                                 }
-                                self.webSkelPresenter = webSkel.ResourceManager.initialisePresenter(attr.nodeValue, self, invalidate);
+                                self.webSkelPresenter = WebSkel.instance.ResourceManager.initialisePresenter(attr.nodeValue, self, invalidate);
                             }
                         });
                         if (!self.webSkelPresenter) {
@@ -349,7 +352,7 @@ class WebSkel {
 
                     async disconnectedCallback() {
                         if (this.resources.css) {
-                            await webSkel.ResourceManager.unloadStyleSheets(this.componentName);
+                            await WebSkel.instance.ResourceManager.unloadStyleSheets(this.componentName);
                         }
                     }
 

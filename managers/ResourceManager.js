@@ -1,3 +1,5 @@
+import WebSkel from "../webSkel.js";
+
 export class ResourceManager {
     constructor() {
         this.loadedStyleSheets = new Map();
@@ -69,11 +71,11 @@ export class ResourceManager {
 
             return this.components[component.name].loadingPromise = (async () => {
                 try {
-                    const componentPath = `./${webSkel.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.html`;
+                    const componentPath = `./${WebSkel.instance.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.html`;
                     const template = component.loadedTemplate || await (await fetch(componentPath)).text();
                     this.components[component.name].html = template;
 
-                    const cssPath = `./${webSkel.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.css`;
+                    const cssPath = `./${WebSkel.instance.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.css`;
                     const css = component.loadedCSSs || [await (await fetch(cssPath)).text()];
                     this.components[component.name].css = css;
                     await this.loadStyleSheets(css, component.name);
@@ -82,7 +84,7 @@ export class ResourceManager {
                         if(component.presenterModule){
                             this.registerPresenter(component.name, component.presenterModule[component.presenterClassName]);
                         } else {
-                            const presenterPath = `../../${webSkel.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.js`;
+                            const presenterPath = `../../${WebSkel.instance.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.js`;
                             const PresenterModule = await import(presenterPath);
                             this.registerPresenter(component.name, PresenterModule[component.presenterClassName]);
                         }
