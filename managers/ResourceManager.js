@@ -17,7 +17,7 @@ export class ResourceManager {
 
     async loadStyleSheet({url = null, cssText = null, identifier = null}) {
         if (!url && !cssText) {
-            throw new Error('Either a URL or CSS text must be provided.');
+            return;
         }
 
         const key = identifier || url;
