@@ -351,9 +351,12 @@ class WebSkel {
                     }
 
                     async disconnectedCallback() {
-                        if (this.resources.css) {
-                            await WebSkel.instance.ResourceManager.unloadStyleSheets(this.componentName);
+                        if(this.resources){
+                            if (this.resources.css) {
+                                await WebSkel.instance.ResourceManager.unloadStyleSheets(this.componentName);
+                            }
                         }
+                        // else case where you try to remove a css that has not been loaded yet
                     }
 
                     refresh() {
