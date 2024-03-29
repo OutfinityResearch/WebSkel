@@ -20,7 +20,7 @@ export async function showModal(modalComponentName, componentProps, waitForData)
     });
     bodyElement.appendChild(modal);
     await modal.showModal();
-
+    modal.addEventListener("keydown",preventCloseOnEsc);
     if(waitForData){
         return new Promise((resolve, reject)=>{
             modal.addEventListener("close", (event)=>{
@@ -29,6 +29,12 @@ export async function showModal(modalComponentName, componentProps, waitForData)
         });
     }
     return modal;
+}
+
+function preventCloseOnEsc(event){
+    if(event.key === "Escape"){
+        event.preventDefault();
+    }
 }
 function createModal(childTagName, modalData) {
     let modal = document.createElement("dialog");
