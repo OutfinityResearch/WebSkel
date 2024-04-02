@@ -22,19 +22,20 @@ class WebSkel {
         }
         console.log("creating new app manager instance");
     }
-    static async initialise(configsPath){
-        if(WebSkel.instance){
+
+    static async initialise(configsPath) {
+        if (WebSkel.instance) {
             return WebSkel.instance;
         }
         let webSkel = new WebSkel();
         const utilModules = [
-           './utils/dom-utils.js',
+            './utils/dom-utils.js',
             './utils/form-utils.js',
             './utils/modal-utils.js',
             './utils/template-utils.js',
             './utils/browser-utils.js'
         ];
-        for (const  path of utilModules) {
+        for (const path of utilModules) {
             const moduleExports = await import(path);
             for (const [fnName, fn] of Object.entries(moduleExports)) {
                 webSkel[fnName] = fn;
@@ -44,6 +45,7 @@ class WebSkel {
         WebSkel.instance = webSkel;
         return WebSkel.instance;
     }
+
     async loadConfigs(jsonPath) {
         try {
             const response = await fetch(jsonPath);
@@ -61,8 +63,6 @@ class WebSkel {
             await showApplicationError("Error loading configs", "Error loading configs", `Encountered ${error} while trying loading webSkel configs`);
         }
     }
-
-
 
 
     initialiseService(instance) {
@@ -83,6 +83,7 @@ class WebSkel {
             }
             return randomId;
         }
+
         let loader = this.defaultLoader.cloneNode(true);
         let id = generateRandomId(12);
         loader.setAttribute("data-id", id)
@@ -90,12 +91,15 @@ class WebSkel {
         await loader.showModal();
         return id;
     }
+
     hideLoading(id) {
-        if(id){
+        if (id) {
             let loader = document.querySelector(`[data-id = '${id}' ]`);
-            loader.close();
-            loader.remove();
-        }else {
+            if (loader) {
+                loader.close();
+                loader.remove();
+            }
+        } else {
             let loaderElements = document.querySelectorAll(".spinner");
             loaderElements.forEach(loader => {
                 loader.close();
@@ -103,15 +107,18 @@ class WebSkel {
             });
         }
     }
-    setLoading(stringHTML){
+
+    setLoading(stringHTML) {
         this.defaultLoader.innerHTML = stringHTML;
         this.defaultLoader.classList.remove("spinner-default-style");
     }
-    resetLoading(){
+
+    resetLoading() {
         this.defaultLoader = document.createElement("dialog");
         this.defaultLoader.classList.add("spinner");
         this.defaultLoader.classList.add("spinner-default-style");
     }
+
     /* without server request */
     async changeToDynamicPage(pageHtmlTagName, url, dataPresenterParams, skipHistoryState) {
         const id = await this.showLoading();
@@ -128,7 +135,7 @@ class WebSkel {
         } catch (error) {
             console.log("Failed to change page", error);
         } finally {
-           this.hideLoading(id);
+            this.hideLoading(id);
         }
     }
 
@@ -298,7 +305,7 @@ class WebSkel {
                             if (typeof self.variables[attr.nodeName]) {
                                 self.variables[attr.nodeName] = attr.nodeValue;
                             }
-                            const displayError = (e) =>{
+                            const displayError = (e) => {
                                 self.innerHTML = `Error rendering component: ${self.componentName}\n: ` + e + e.stack.split('\n')[1];
                                 console.error(e);
                                 WebSkel.instance.hideLoading();
@@ -306,8 +313,8 @@ class WebSkel {
 
                             if (attr.name === "data-presenter") {
                                 const invalidate = (loadDataAsyncFunction) => {
-                                    const renderPage = ()=>{
-                                        requestAnimationFrame( () => {
+                                    const renderPage = () => {
+                                        requestAnimationFrame(() => {
                                             try {
                                                 self.webSkelPresenter.beforeRender();
                                                 for (let vn in self.variables) {
@@ -319,29 +326,31 @@ class WebSkel {
                                                 requestAnimationFrame(() => {
                                                     try {
                                                         self.webSkelPresenter.afterRender?.();
-                                                        WebSkel.instance.hideLoading();
                                                     } catch (e) {
-                                                       displayError(e);
+                                                        displayError(e);
                                                     }
                                                 });
-                                            }
-                                        catch (e) {
+                                            } catch (e) {
                                                 displayError(e);
                                             }
                                         });
                                     };
-                                    if(loadDataAsyncFunction){
-                                            WebSkel.instance.showLoading().then(()=>{
-                                                    loadDataAsyncFunction().then(()=>{
-                                                        renderPage();
-                                                    }).catch((e) => {
-                                                        displayError(e);
-                                                    });
-                                            });
-                                    }else {
-                                       renderPage();
-                                    }
+
+                                    WebSkel.instance.showLoading().then(() => {
+                                        if (loadDataAsyncFunction) {
+                                            loadDataAsyncFunction().then(() => {
+                                                renderPage();
+                                                WebSkel.instance.hideLoading();
+                                            }).catch(e => {
+                                                displayError(e);
+                                            })
+                                        } else {
+                                            renderPage();
+                                            WebSkel.instance.hideLoading();
+                                        }
+                                    })
                                 }
+
                                 self.webSkelPresenter = WebSkel.instance.ResourceManager.initialisePresenter(attr.nodeValue, self, invalidate);
                             }
                         });
@@ -351,7 +360,7 @@ class WebSkel {
                     }
 
                     async disconnectedCallback() {
-                        if(this.resources){
+                        if (this.resources) {
                             if (this.resources.css) {
                                 await WebSkel.instance.ResourceManager.unloadStyleSheets(this.componentName);
                             }
