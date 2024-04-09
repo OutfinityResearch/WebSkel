@@ -11,7 +11,6 @@ export async function extractFormInformation(element, conditions) {
         formData.isValid = form.checkValidity();
     }
     const namedElements = [...form.querySelectorAll("[name]:not([type=hidden])")];
-    let password = {};
     for (const element of namedElements) {
         if(element.disabled){
             continue;

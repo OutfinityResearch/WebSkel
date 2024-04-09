@@ -339,9 +339,7 @@ class WebSkel {
                         this.templateArray = createTemplateArray(this.resources.html);
                         let self = this;
                         Array.from(self.attributes).forEach((attr) => {
-                            if (typeof self.variables[attr.nodeName]) {
-                                self.variables[attr.nodeName] = attr.nodeValue;
-                            }
+                            self.variables[attr.nodeName] = attr.nodeValue;
                             const displayError = (e) => {
                                 self.innerHTML = `Error rendering component: ${self.componentName}\n: ` + e + e.stack.split('\n')[1];
                                 console.error(e);

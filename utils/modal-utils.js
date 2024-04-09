@@ -22,7 +22,7 @@ export async function showModal(modalComponentName, componentProps, waitForData)
     await modal.showModal();
     modal.addEventListener("keydown",preventCloseOnEsc);
     if(waitForData){
-        return new Promise((resolve, reject)=>{
+        return new Promise((resolve)=>{
             modal.addEventListener("close", (event)=>{
                 resolve(event.data);
             });
