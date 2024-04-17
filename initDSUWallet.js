@@ -11,11 +11,12 @@ function overwriteIframeLog() {
 
 async function defineNativeComponents() {
     const define = async (name) => {
-        const { default: component } = await import(`../wallet/components/${name}/${name}.js`);
+        const {default: component} = await import(`../wallet/components/${name}/${name}.js`);
         customElements.define(name, component);
     };
 
 }
+
 async function setMainDSU(opendsu, crypto) {
     const resolver = opendsu.loadAPI("resolver");
 
@@ -38,7 +39,6 @@ async function setMainDSU(opendsu, crypto) {
         }
 
 
-
         const ssiPath = arrayBufferToHex(crypto.randomBytes(64));
 
         const versionlessDSU = await $$.promisify(resolver.createVersionlessDSU)(ssiPath);
@@ -52,7 +52,7 @@ async function setMainDSU(opendsu, crypto) {
     console.log("environmentJs", environmentJs);
 }
 
-export async function initDSUWallet(opendsu, crypto){
+export async function initDSUWallet(opendsu, crypto) {
     try {
         await setMainDSU(opendsu, crypto);
     } catch (error) {

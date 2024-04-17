@@ -1,8 +1,8 @@
-import { getClosestParentElement } from "./dom-utils.js";
+import {getClosestParentElement} from "./dom-utils.js";
 import WebSkel from "../webSkel.js";
 
 export async function showModal(modalComponentName, componentProps, waitForData) {
-    if(typeof componentProps === "boolean"){
+    if (typeof componentProps === "boolean") {
         waitForData = componentProps;
         componentProps = undefined;
     }
@@ -20,10 +20,10 @@ export async function showModal(modalComponentName, componentProps, waitForData)
     });
     bodyElement.appendChild(modal);
     await modal.showModal();
-    modal.addEventListener("keydown",preventCloseOnEsc);
-    if(waitForData){
-        return new Promise((resolve)=>{
-            modal.addEventListener("close", (event)=>{
+    modal.addEventListener("keydown", preventCloseOnEsc);
+    if (waitForData) {
+        return new Promise((resolve) => {
+            modal.addEventListener("close", (event) => {
                 resolve(event.data);
             });
         });
@@ -31,24 +31,25 @@ export async function showModal(modalComponentName, componentProps, waitForData)
     return modal;
 }
 
-function preventCloseOnEsc(event){
-    if(event.key === "Escape"){
+function preventCloseOnEsc(event) {
+    if (event.key === "Escape") {
         event.preventDefault();
     }
 }
+
 function createModal(childTagName, modalData) {
     let modal = document.createElement("dialog");
-    let componentString= "";
-    if(modalData !== undefined) {
+    let componentString = "";
+    if (modalData !== undefined) {
         Object.keys(modalData).forEach((componentKey) => {
-            componentString +=` data-${componentKey}="${modalData[componentKey]}"`;
+            componentString += ` data-${componentKey}="${modalData[componentKey]}"`;
         });
     }
     let component = WebSkel.instance.configs.components.find(component => component.name === childTagName);
-    if(component.presenterClassName){
+    if (component.presenterClassName) {
         componentString += ` data-presenter="${childTagName}"`;
     }
-    componentString === "" ? modal.innerHTML = `<${childTagName}/>`:modal.innerHTML = `<${childTagName}${componentString}/>`;
+    componentString === "" ? modal.innerHTML = `<${childTagName}/>` : modal.innerHTML = `<${childTagName}${componentString}/>`;
     modal.classList.add("modal", `${childTagName}-dialog`);
 
     return modal;
@@ -56,7 +57,7 @@ function createModal(childTagName, modalData) {
 
 export function closeModal(element, data) {
     const existingModal = getClosestParentElement(element, "dialog");
-    if(data){
+    if (data) {
         let closeEvent = new Event('close', {
             bubbles: true,
             cancelable: true
@@ -70,10 +71,10 @@ export function closeModal(element, data) {
     }
 }
 
-export function removeActionBox(actionBox, instance){
+export function removeActionBox(actionBox, instance) {
     document.removeEventListener('click', actionBox.clickHandler);
     actionBox.remove();
-    if(instance !== undefined) {
+    if (instance !== undefined) {
         delete instance.actionBox;
     }
 }
@@ -122,15 +123,14 @@ export async function showActionBox(targetElement, primaryKey, componentName, in
                 const parentNode = componentNode.parentNode;
                 parentNode.removeChild(componentNode);
                 parentNode.appendChild(oldComponentNode);
-            }
-            else if (insertionMode === "replace-all" && oldComponentNode) {
+            } else if (insertionMode === "replace-all" && oldComponentNode) {
                 const parentElement = componentNode.parentNode;
                 parentElement.innerHTML = oldComponentNode;
             }
             removeActionBox(componentNode);
         }
     };
-    componentNode.clickHandler=clickHandler;
+    componentNode.clickHandler = clickHandler;
     document.addEventListener('click', clickHandler);
     return componentNode;
 }

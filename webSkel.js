@@ -124,7 +124,7 @@ class WebSkel {
         try {
             this.validateTagName(pageHtmlTagName);
         } catch (e) {
-            showApplicationError(e,e,e);
+            showApplicationError(e, e, e);
             console.error(e);
             return;
         }
@@ -145,13 +145,14 @@ class WebSkel {
             this.hideLoading(id);
         }
     }
+
     validateTagName(tagName) {
         let regex = /^(?![0-9])[a-z0-9]+(?:-*[a-z0-9]+)*-*?$/;
-        if(!regex.test(tagName)){
+        if (!regex.test(tagName)) {
             throw new Error(`Invalid tag name: ${tagName}`);
         }
         let element = this.configs.components.find((element) => element.name === tagName);
-        if(!element){
+        if (!element) {
             throw new Error(`Element not found in configs: ${tagName}`);
         }
     }
@@ -196,20 +197,21 @@ class WebSkel {
         try {
             this.preventExternalResources(content);
         } catch (e) {
-            showApplicationError(e,e,e);
+            showApplicationError(e, e, e);
             console.error(e);
             return;
         }
         this._appContent.innerHTML = content;
     }
+
     preventExternalResources(content) {
         let regex = /(src|href|action|onclick)\s*=\s*"[^"]*"/g;
         let matches = content.match(regex);
-        if(matches){
-            for(let match of matches){
+        if (matches) {
+            for (let match of matches) {
                 let url = match.split('"')[1];
                 let linkDomain = (new URL(url)).host;
-                if(window.location.host !== linkDomain){
+                if (window.location.host !== linkDomain) {
                     throw new Error(`External resource detected: ${url}`);
                 }
             }

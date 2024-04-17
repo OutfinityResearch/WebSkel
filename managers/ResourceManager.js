@@ -81,7 +81,7 @@ export class ResourceManager {
                     await this.loadStyleSheets(css, component.name);
 
                     if (component.presenterClassName) {
-                        if(component.presenterModule){
+                        if (component.presenterModule) {
                             this.registerPresenter(component.name, component.presenterModule[component.presenterClassName]);
                         } else {
                             const presenterPath = `../../${WebSkel.instance.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.js`;
@@ -90,7 +90,7 @@ export class ResourceManager {
                         }
                     }
                     this.components[component.name].isPromiseFulfilled = true;
-                    return { html: template, css: css };
+                    return {html: template, css: css};
                 } catch (error) {
                     throw error;
                 }
@@ -118,7 +118,7 @@ export class ResourceManager {
         try {
             presenter = new this.components[component.componentName].presenter(component, invalidate);
         } catch (e) {
-            showApplicationError(`Error creating a presenter instance`, `Encountered an error during the initialization of ${presenterName} for component: ${component.componentName}`, e + ":"+ e.stack.split('\n')[1]);
+            showApplicationError(`Error creating a presenter instance`, `Encountered an error during the initialization of ${presenterName} for component: ${component.componentName}`, e + ":" + e.stack.split('\n')[1]);
             return undefined;
         }
         return presenter;
