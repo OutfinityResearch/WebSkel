@@ -317,7 +317,6 @@ class WebSkel {
         }
         return result;
     }
-
     defineComponent = async (component) => {
         if (!customElements.get(component.name)) {
             customElements.define(
