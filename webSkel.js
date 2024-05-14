@@ -394,6 +394,11 @@ class WebSkel {
                     }
 
                     async disconnectedCallback() {
+                        if(this.webSkelPresenter){
+                            if(this.webSkelPresenter.afterUnload){
+                                await this.webSkelPresenter.afterUnload();
+                            }
+                        }
                         if (this.resources) {
                             if (this.resources.css) {
                                 await WebSkel.instance.ResourceManager.unloadStyleSheets(this.componentName);
