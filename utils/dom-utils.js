@@ -147,25 +147,28 @@ export function notBasePage(url) {
     return !(slashCount > 1 || (slashCount === 1 && url.charAt(url.length - 1) !== '/'));
 }
 
-export function sanitize(str) {
-    if (str && typeof str === "string") {
-        return str.replace(/&/g, '&amp;')
+export function unsanitize(value) {
+    if (value != null) {
+        let div = document.createElement("div");
+        let text = document.createTextNode(value);
+        div.appendChild(text);
+        return div.innerHTML;
+    }
+    return '';
+}
+export function sanitize(value) {
+    if (value != null) {
+        return ('' + value).replace(/&/g, '&amp;')
+            .replace(/'/g, '&#39;')
+            .replace(/"/g, '&quot;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;')
-            .replace(/\s/g, '&nbsp;');
+            .replace(/\r\n/g, '&#13;')
+            .replace(/[\r\n]/g, '&#13;');
     }
+    return '';
 }
 
-export function unsanitize(str) {
-    if (typeof str !== 'string') {
-        throw new TypeError('unsanitize expects a string');
-    }
-    const textArea = document.createElement('textarea');
-    textArea.innerHTML = str;
-    return textArea.value;
-}
 
 export function customTrim(str) {
     return str.replace(/^[\u00A0\s]+|[\u00A0\s]+$/g, '')

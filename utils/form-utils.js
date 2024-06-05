@@ -1,4 +1,4 @@
-import { getClosestParentElement } from "./dom-utils.js";
+import {getClosestParentElement, sanitize} from "./dom-utils.js";
 
 export async function extractFormInformation(element, conditions) {
     const form = getClosestParentElement(element, "form");
@@ -12,6 +12,9 @@ export async function extractFormInformation(element, conditions) {
     }
     const namedElements = [...form.querySelectorAll("[name]:not([type=hidden])")];
     for (const element of namedElements) {
+        if(element.value){
+            element.value = sanitize(element.value);
+        }
         if(element.disabled){
             continue;
             //skip it

@@ -1,6 +1,7 @@
 import {createTemplateArray, findDoubleDollarWords} from "./utils/template-utils.js";
 import {showModal} from "./utils/modal-utils.js";
 import {ResourceManager} from "./managers/ResourceManager.js";
+import {sanitize} from "./utils/dom-utils.js";
 
 class WebSkel {
     constructor() {
@@ -338,7 +339,7 @@ class WebSkel {
                         this.templateArray = createTemplateArray(this.resources.html);
                         let self = this;
                         Array.from(self.attributes).forEach((attr) => {
-                            self.variables[attr.nodeName] = attr.nodeValue;
+                            self.variables[attr.nodeName] = sanitize(attr.nodeValue);
                             const displayError = (e) => {
                                 self.innerHTML = `Error rendering component: ${self.componentName}\n: ` + e + e.stack.split('\n')[1];
                                 console.error(e);
