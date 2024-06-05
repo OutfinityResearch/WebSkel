@@ -12,9 +12,6 @@ export async function extractFormInformation(element, conditions) {
     }
     const namedElements = [...form.querySelectorAll("[name]:not([type=hidden])")];
     for (const element of namedElements) {
-        if(element.value){
-            element.value = sanitize(element.value);
-        }
         if(element.disabled){
             continue;
             //skip it
@@ -75,6 +72,9 @@ export async function extractFormInformation(element, conditions) {
     }
     if(!form.checkValidity()) {
         form.reportValidity();
+    }
+    for(let key of Object.keys(formData.data)){
+        formData.data[key] = sanitize(formData.data[key]);
     }
     return formData;
 }

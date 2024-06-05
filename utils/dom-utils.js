@@ -164,7 +164,8 @@ export function sanitize(value) {
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
             .replace(/\r\n/g, '&#13;')
-            .replace(/[\r\n]/g, '&#13;');
+            .replace(/[\r\n]/g, '&#13;').
+            replace(/\s/g, '&nbsp;');
     }
     return '';
 }
