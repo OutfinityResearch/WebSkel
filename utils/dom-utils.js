@@ -157,8 +157,8 @@ export function unsanitize(value) {
     return '';
 }
 export function sanitize(value) {
-    if (value != null) {
-        return ('' + value).replace(/&/g, '&amp;')
+    if (value != null && typeof value === "string") {
+        return value.replace(/&/g, '&amp;')
             .replace(/'/g, '&#39;')
             .replace(/"/g, '&quot;')
             .replace(/</g, '&lt;')
@@ -167,7 +167,7 @@ export function sanitize(value) {
             .replace(/[\r\n]/g, '&#13;').
             replace(/\s/g, '&nbsp;');
     }
-    return '';
+    return value;
 }
 
 
