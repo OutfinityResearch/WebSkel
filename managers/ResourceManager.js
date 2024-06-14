@@ -71,11 +71,18 @@ export class ResourceManager {
 
             return this.components[component.name].loadingPromise = (async () => {
                 try {
-                    const componentPath = `./${WebSkel.instance.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.html`;
+                    let componentPath;
+                    let cssPath;
+                    if(component.directory){
+                        componentPath = `./${WebSkel.instance.configs.webComponentsRootDir}/${component.directory}/${component.type}/${component.name}/${component.name}.html`;
+                        cssPath = `./${WebSkel.instance.configs.webComponentsRootDir}/${component.directory}/${component.type}/${component.name}/${component.name}.css`;
+                    } else {
+                        componentPath = `./${WebSkel.instance.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.html`;
+                        cssPath = `./${WebSkel.instance.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.css`;
+                    }
                     const template = component.loadedTemplate || await (await fetch(componentPath)).text();
                     this.components[component.name].html = template;
 
-                    const cssPath = `./${WebSkel.instance.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.css`;
                     const css = component.loadedCSSs || [await (await fetch(cssPath)).text()];
                     this.components[component.name].css = css;
                     await this.loadStyleSheets(css, component.name);
@@ -84,7 +91,12 @@ export class ResourceManager {
                         if(component.presenterModule){
                             this.registerPresenter(component.name, component.presenterModule[component.presenterClassName]);
                         } else {
-                            const presenterPath = `../../${WebSkel.instance.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.js`;
+                            let presenterPath;
+                            if(component.directory){
+                                presenterPath = `../../${WebSkel.instance.configs.webComponentsRootDir}/${component.directory}/${component.type}/${component.name}/${component.name}.js`;
+                            } else {
+                                presenterPath = `../../${WebSkel.instance.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.js`;
+                            }
                             const PresenterModule = await import(presenterPath);
                             this.registerPresenter(component.name, PresenterModule[component.presenterClassName]);
                         }
