@@ -12,22 +12,22 @@ export async function extractFormInformation(element, conditions) {
     }
     const namedElements = [...form.querySelectorAll("[name]:not([type=hidden])")];
     for (const element of namedElements) {
-        if(element.disabled){
+        if (element.disabled) {
             continue;
             //skip it
         }
-        if(element.multiple && element.tagName === "SELECT"){
+        if (element.multiple && element.tagName === "SELECT") {
             formData.data[element.name] = Array.from(element.selectedOptions).map(option => option.value);
-        }else {
+        } else {
             formData.data[element.name] = element.tagName === "CHECKBOX" ? element.checked : element.value;
         }
 
-        if(element.getAttribute("type") === "file") {
-            if(element.multiple){
+        if (element.getAttribute("type") === "file") {
+            if (element.multiple) {
                 formData.data[element.name] = element.files;
-            }else {
+            } else {
                 try {
-                    if(element.files.length>0) {
+                    if (element.files.length > 0) {
                         formData.data[element.name] = await imageUpload(element.files[0])
                     }
                 } catch (err) {
@@ -43,12 +43,12 @@ export async function extractFormInformation(element, conditions) {
             const inputElement = await element.getInputElement();
             isValid = inputElement.checkValidity();
         }
-        if(isValid === true) {
+        if (isValid === true) {
             if (conditions) {
                 let conditionFunctionName = element.getAttribute("data-condition")
                 if (conditionFunctionName) {
                     isValid = conditions[conditionFunctionName].fn(element, formData);
-                    if(isValid) {
+                    if (isValid) {
                         element.setCustomValidity("");
                     } else {
                         element.setCustomValidity(conditions[conditionFunctionName].errorMessage);
@@ -62,7 +62,7 @@ export async function extractFormInformation(element, conditions) {
             element
         };
         let inputBorderElem = document.querySelector(`[data-id = '${element.getAttribute("id")}' ]`);
-        if(inputBorderElem) {
+        if (inputBorderElem) {
             if (!isValid) {
                 inputBorderElem.classList.add("input-invalid");
             } else {
@@ -70,10 +70,13 @@ export async function extractFormInformation(element, conditions) {
             }
         }
     }
-    if(!form.checkValidity()) {
+    if (!form.checkValidity()) {
         form.reportValidity();
     }
-    for(let key of Object.keys(formData.data)){
+    for (let key of Object.keys(formData.data)) {
+        if (formData.elements[key] && formData.elements[key].element && formData.elements[key].element.hasAttribute("data-no-sanitize")) {
+            continue;
+        }
         formData.data[key] = sanitize(formData.data[key]);
     }
     return formData;
@@ -87,7 +90,7 @@ export async function imageUpload(file) {
             base64String = reader.result;
             resolve(base64String);
         }
-        if(file) {
+        if (file) {
             reader.readAsDataURL(file);
         } else {
             reject("No file given as input at imageUpload");
@@ -95,7 +98,7 @@ export async function imageUpload(file) {
     })
 }
 
-export async function uploadFileAsText(file){
+export async function uploadFileAsText(file) {
     let string = "";
     let reader = new FileReader();
     return await new Promise((resolve, reject) => {
@@ -103,7 +106,7 @@ export async function uploadFileAsText(file){
             string = reader.result;
             resolve(string);
         }
-        if(file) {
+        if (file) {
             reader.readAsText(file);
         } else {
             reject("No file given as input");
