@@ -240,19 +240,20 @@ class WebSkel {
                     const [actionName, ...actionParams] = action.split(" ");
                     while (actionHandled === false) {
                         let presenterFound = false;
+                        let p;
                         /* Urcam in Arborele DOM si cautam un element care are webSkelPresenter */
-                        while (currentCustomElement !== document && presenterFound === false) {
+                        while (presenterFound === false) {
+                            if (currentCustomElement.webSkelPresenter) {
+                                presenterFound = true;
+                                p= Object.getPrototypeOf(currentCustomElement.webSkelPresenter);
+                                break;
+                            }
                             currentCustomElement = currentCustomElement.parentElement;
-                            if (currentCustomElement === document) {
+                            if(currentCustomElement === document){
                                 await showApplicationError("Error executing action", "Action not found in any Presenter", "Action not found in any Presenter");
                                 return;
                             }
-                            if (currentCustomElement.webSkelPresenter) {
-                                presenterFound = true;
-                            }
                         }
-                        let p = currentCustomElement.webSkelPresenter;
-                        p = Object.getPrototypeOf(p);
                         if (p[actionName] !== undefined) {
                             try {
                                 currentCustomElement.webSkelPresenter[actionName](target, ...actionParams);
@@ -264,6 +265,7 @@ class WebSkel {
                             }
                         } else {
                             presenterFound = false;
+                            currentCustomElement = currentCustomElement.parentElement;
                         }
                     }
                 } else {
