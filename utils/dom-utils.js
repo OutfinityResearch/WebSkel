@@ -148,14 +148,18 @@ export function notBasePage(url) {
 }
 
 export function unsanitize(value) {
-    if (value != null) {
-        let div = document.createElement("div");
-        let text = document.createTextNode(value);
-        div.appendChild(text);
-        return div.innerHTML;
+    if (value != null && typeof value === "string") {
+        return value.replace(/&nbsp;/g, ' ')
+            .replace(/&#13;/g, '\n')
+            .replace(/&amp;/g, '&')
+            .replace(/&#39;/g, "'")
+            .replace(/&quot;/g, '"')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>');
     }
     return '';
 }
+
 export function sanitize(value) {
     if (value != null && typeof value === "string") {
         return value.replace(/&/g, '&amp;')
