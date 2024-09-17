@@ -174,6 +174,18 @@ export function sanitize(value) {
     return value;
 }
 
+export function normalizeSpaces(value) {
+    if (value != null && typeof value === "string") {
+        return value
+            .replace(/\u00A0/g, ' ')  // Replace non-breaking spaces (Unicode \u00A0)
+            .replace(/&nbsp;/g, ' ')  // Replace HTML non-breaking spaces (&nbsp;)
+            .replace(/\s+/g, ' ')     // Replace all types of whitespace (spaces, tabs, newlines) with a single space
+            .trim();                  // Remove leading and trailing spaces
+    }
+    return value;
+}
+
+
 
 export function customTrim(str) {
     return str.replace(/^[\u00A0\s]+|[\u00A0\s]+$/g, '')
