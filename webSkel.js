@@ -76,7 +76,7 @@ class WebSkel {
         });
     }
 
-    async showLoading() {
+    showLoading() {
         function generateRandomId(length) {
             const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let randomId = '';
@@ -91,7 +91,7 @@ class WebSkel {
         loader.setAttribute("data-id", id)
         if (this.loaderCount === 0) {
             document.body.appendChild(loader);
-            await loader.showModal();
+            loader.showModal();
         } else {
             this.loaderCount++;
         }
@@ -99,7 +99,7 @@ class WebSkel {
     }
 
     hideLoading(id) {
-        if (this.loaderCount >1) {
+        if (this.loaderCount > 1) {
             this.loaderCount--;
             return;
         }
@@ -138,7 +138,7 @@ class WebSkel {
             console.error(e);
             return;
         }
-        const id = await this.showLoading();
+        const id = this.showLoading();
         let attributesStringPresenter = '';
         if (dataPresenterParams)
             attributesStringPresenter = Object.entries(dataPresenterParams).map(([key, value]) => `data-${key}="${value}"`).join(' ');
@@ -169,7 +169,7 @@ class WebSkel {
 
     /* with server request */
     async changeToStaticPage(pageUrl, skipHistoryState) {
-        const loadingId = await this.showLoading();
+        const loadingId = this.showLoading();
         try {
             const pageContent = await this.fetchTextResult(pageUrl, skipHistoryState);
             this.updateAppContent(pageContent);
@@ -341,6 +341,11 @@ class WebSkel {
                         super();
                         this.variables = {};
                         this.componentName = component.name;
+
+                        this.presenterReadyPromise = new Promise((resolve) => {
+                            this.onPresenterReady = resolve;
+                        });
+                        this.isPresenterReady = false;
                     }
 
                     async connectedCallback() {
@@ -352,59 +357,57 @@ class WebSkel {
                         });
                         this.templateArray = createTemplateArray(this.resources.html);
                         let self = this;
+                        let presenter = null;
                         Array.from(self.attributes).forEach((attr) => {
                             self.variables[attr.nodeName] = sanitize(attr.nodeValue);
-                            const displayError = (e) => {
-                                self.innerHTML = `Error rendering component: ${self.componentName}\n: ` + e + e.stack.split('\n')[1];
-                                console.error(e);
-                                WebSkel.instance.hideLoading();
-                            }
-
                             if (attr.name === "data-presenter") {
-                                const invalidate = (loadDataAsyncFunction) => {
-                                    const renderPage = () => {
-                                        requestAnimationFrame(() => {
-                                            try {
-                                                self.webSkelPresenter.beforeRender();
-                                                for (let vn in self.variables) {
-                                                    if (typeof self.webSkelPresenter[vn] !== "undefined") {
-                                                        self.variables[vn] = self.webSkelPresenter[vn];
-                                                    }
-                                                }
-                                                self.refresh();
-                                                requestAnimationFrame(() => {
-                                                    try {
-                                                        self.webSkelPresenter.afterRender?.();
-                                                    } catch (e) {
-                                                        displayError(e);
-                                                    }
-                                                });
-                                            } catch (e) {
-                                                displayError(e);
-                                            }
-                                        });
-                                    };
-
-                                    WebSkel.instance.showLoading().then(() => {
-                                        if (loadDataAsyncFunction) {
-                                            loadDataAsyncFunction().then(() => {
-                                                renderPage();
-                                                WebSkel.instance.hideLoading();
-                                            }).catch(e => {
-                                                displayError(e);
-                                            })
-                                        } else {
-                                            renderPage();
-                                            WebSkel.instance.hideLoading();
-                                        }
-                                    })
-                                }
-
-                                self.webSkelPresenter = WebSkel.instance.ResourceManager.initialisePresenter(attr.nodeValue, self, invalidate);
+                                presenter = attr.nodeValue;
                             }
                         });
-                        if (!self.webSkelPresenter) {
-                            await self.refresh();
+                        if (presenter) {
+                            const invalidate = async (loadDataAsyncFunction) => {
+                                const displayError = (e) => {
+                                    self.innerHTML = `Error rendering component: ${self.componentName}\n: ` + e + e.stack.split('\n')[1];
+                                    console.error(e);
+                                    WebSkel.instance.hideLoading();
+                                }
+                                const renderPage = async () => {
+                                    try {
+                                        await self.webSkelPresenter.beforeRender();
+                                        for (let vn in self.variables) {
+                                            if (typeof self.webSkelPresenter[vn] !== "undefined") {
+                                                self.variables[vn] = self.webSkelPresenter[vn];
+                                            }
+                                        }
+                                        self.refresh();
+                                        await self.webSkelPresenter.afterRender?.();
+                                    } catch (e) {
+                                        displayError(e);
+                                    }
+                                };
+                                WebSkel.instance.showLoading();
+                                if (loadDataAsyncFunction) {
+                                    try {
+                                        await loadDataAsyncFunction();
+                                    } catch (error) {
+                                        return displayError(error);
+                                    }
+                                }
+                                await renderPage();
+                                WebSkel.instance.hideLoading();
+                            }
+                            const invalidateProxy = new Proxy(invalidate, {
+                                apply: async function (target, thisArg, argumentsList) {
+                                    if (!self.isPresenterReady) {
+                                        await self.presenterReadyPromise;
+                                    }
+                                    return Reflect.apply(target, thisArg, argumentsList);
+                                }
+                            });
+
+                            self.webSkelPresenter = WebSkel.instance.ResourceManager.initialisePresenter(presenter, self, invalidateProxy);
+                        } else {
+                            self.refresh();
                         }
                     }
 

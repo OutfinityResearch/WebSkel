@@ -129,9 +129,10 @@ export class ResourceManager {
         let presenter;
         try {
             presenter = new this.components[component.componentName].presenter(component, invalidate);
+            component.isPresenterReady = true;
+            component.onPresenterReady();
         } catch (e) {
             showApplicationError(`Error creating a presenter instance`, `Encountered an error during the initialization of ${presenterName} for component: ${component.componentName}`, e + ":"+ e.stack.split('\n')[1]);
-            return undefined;
         }
         return presenter;
     }
