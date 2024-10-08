@@ -358,12 +358,13 @@ class WebSkel {
                         this.templateArray = createTemplateArray(this.resources.html);
                         let self = this;
                         let presenter = null;
-                        Array.from(self.attributes).forEach((attr) => {
+
+                        for (const attr of self.attributes){
                             self.variables[attr.nodeName] = sanitize(attr.nodeValue);
-                            if (attr.name === "data-presenter") {
+                            if(attr.name === "data-presenter"){
                                 presenter = attr.nodeValue;
                             }
-                        });
+                        }
                         if (presenter) {
                             const invalidate = async (loadDataAsyncFunction) => {
                                 const displayError = (e) => {
