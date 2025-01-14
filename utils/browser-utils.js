@@ -50,7 +50,7 @@ export function getURLParams() {
     for (let key of urlParams.keys()) {
         result[key] = urlParams.get(key);
     }
-
+    return result;
 }
 
 export function getHashParams() {
