@@ -37,8 +37,6 @@ async function setMainDSU(opendsu, crypto) {
             return;
         }
 
-
-
         const ssiPath = arrayBufferToHex(crypto.randomBytes(64));
 
         const versionlessDSU = await $$.promisify(resolver.createVersionlessDSU)(ssiPath);
