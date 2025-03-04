@@ -167,7 +167,6 @@ class WebSkel {
         }
     }
 
-    /* with server request */
     async changeToStaticPage(pageUrl, skipHistoryState) {
         const loadingId = this.showLoading();
         try {
@@ -252,11 +251,10 @@ class WebSkel {
                     while (actionHandled === false) {
                         let presenterFound = false;
                         let p;
-                        /* Urcam in Arborele DOM si cautam un element care are webSkelPresenter */
                         while (presenterFound === false) {
                             if (currentCustomElement.webSkelPresenter) {
                                 presenterFound = true;
-                                p = Object.getPrototypeOf(currentCustomElement.webSkelPresenter);
+                                p = currentCustomElement.webSkelPresenter;
                                 break;
                             }
                             currentCustomElement = currentCustomElement.parentElement;
