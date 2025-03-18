@@ -125,10 +125,10 @@ export class ResourceManager {
         this.components[name].presenter = presenterClass;
     }
 
-    initialisePresenter(presenterName, component, invalidate) {
+    initialisePresenter(presenterName, component, invalidate,props={}) {
         let presenter;
         try {
-            presenter = new this.components[component.componentName].presenter(component, invalidate);
+            presenter = new this.components[component.componentName].presenter(component, invalidate,props);
             component.isPresenterReady = true;
             component.onPresenterReady();
         } catch (e) {

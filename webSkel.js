@@ -317,18 +317,104 @@ class WebSkel {
             relativeUrlPath = relativeUrlPath.slice(1);
         }
         console.log("Fetching Data from URL: ", appBaseUrl + relativeUrlPath);
-        /* Sending request to server */
         const response = await fetch(appBaseUrl + relativeUrlPath);
         if (!response.ok) {
             throw new Error("Failed to execute request");
         }
         const result = await response.text();
         if (!skipHistoryState) {
-            const path = appBaseUrl + "#" + relativeUrlPath; // leave baseUrl for now
+            const path = appBaseUrl + "#" + relativeUrlPath;
             window.history.pushState({relativeUrlPath, relativeUrlContent: result}, path.toString(), path);
         }
         return result;
     }
+
+    /**
+     * Creates a custom element with reactive properties.
+     * @param {string} elementName - The tag name of the custom element.
+     * @param {HTMLElement|string} [location=document.body] - The parent element or a selector where the element will be appended.
+     * @param {Object} [attributes={}] - An object containing attributes to set on the element.
+     * @param {Object} [props={}] - An object containing initial properties for reactive proxying.
+     * @param {boolean} [observeProps=false] - If true, nested objects in props will be observed.
+     * @returns {Proxy} A reactive proxy for the element's properties.
+     */
+
+    static createElement(
+        elementName,
+        location = document.body,
+        attributes = {},
+        props = {},
+        observeProps = false,
+    ) {
+        const element = document.createElement(elementName);
+
+        const { proxy, revoke } = WebSkel.createReactiveProxy(props, observeProps, element);
+
+        element._webSkelProps = {
+            raw: props,
+            proxy,
+            revoke,
+            observeProps
+        };
+
+        element.setAttribute('data-presenter', elementName);
+
+        Object.entries(attributes).forEach(([key, value]) => {
+            element.setAttribute(key, value);
+        })
+
+        const parent = typeof location === 'string'
+            ? document.querySelector(location)
+            : location;
+        parent?.appendChild(element);
+
+        return proxy;
+    }
+
+    /**
+     * Creates a reactive proxy for an object that triggers an element invalidation on property changes.
+     * @param {Object} target - The target object to wrap in a reactive proxy.
+     * @param {boolean} observe - If true, nested objects are also wrapped in reactive proxies.
+     * @param {HTMLElement} element - The element whose invalidate method is called on property changes.
+     * @returns {{proxy: Proxy, revoke: Function}} An object containing the reactive proxy and a revoke function.
+     */
+    static createReactiveProxy(target, observe, element) {
+        const revokers = new Set();
+
+        const handler = {
+            set(obj, prop, value) {
+                if (observe && typeof value === 'object' && value !== null) {
+                    value = WebSkel.createReactiveProxy(value, observe, element).proxy;
+                }
+
+                const oldValue = obj[prop];
+                obj[prop] = value;
+
+                if (!Object.is(oldValue, value)) {
+                    element.invalidateProxy?.();
+                }
+                return true;
+            },
+            deleteProperty(obj, prop) {
+                delete obj[prop];
+                element.invalidateProxy?.();
+                return true;
+            }
+        };
+
+        const { proxy, revoke } = Proxy.revocable(target, handler);
+
+        if (observe) {
+            for (const key in target) {
+                if (typeof target[key] === 'object' && target[key] !== null) {
+                    target[key] = WebSkel.createReactiveProxy(target[key], observe, element).proxy;
+                }
+            }
+        }
+
+        return { proxy, revoke };
+    }
+
 
     defineComponent = async (component) => {
         if (!customElements.get(component.name)) {
@@ -339,14 +425,23 @@ class WebSkel {
                         super();
                         this.variables = {};
                         this.componentName = component.name;
-
+                        this.props = {};
                         this.presenterReadyPromise = new Promise((resolve) => {
                             this.onPresenterReady = resolve;
                         });
                         this.isPresenterReady = false;
                     }
 
+                    invalidateProxy() {
+                        if (this.invalidateFn) {
+                            this.invalidateFn();
+                        }
+                    }
+
                     async connectedCallback() {
+                        if (this._webSkelProps) {
+                            this.props = this._webSkelProps.proxy;
+                        }
                         this.resources = await WebSkel.instance.ResourceManager.loadComponent(component);
                         let vars = findDoubleDollarWords(this.resources.html);
                         vars.forEach((vn) => {
@@ -357,9 +452,9 @@ class WebSkel {
                         let self = this;
                         let presenter = null;
 
-                        for (const attr of self.attributes){
+                        for (const attr of self.attributes) {
                             self.variables[attr.nodeName] = sanitize(attr.nodeValue);
-                            if(attr.name === "data-presenter"){
+                            if (attr.name === "data-presenter") {
                                 presenter = attr.nodeValue;
                             }
                         }
@@ -403,14 +498,16 @@ class WebSkel {
                                     return Reflect.apply(target, thisArg, argumentsList);
                                 }
                             });
+                            self.invalidateFn = invalidateProxy;
 
-                            self.webSkelPresenter = WebSkel.instance.ResourceManager.initialisePresenter(presenter, self, invalidateProxy);
+                            self.webSkelPresenter = WebSkel.instance.ResourceManager.initialisePresenter(presenter, self, invalidateProxy,this.props);
                         } else {
                             self.refresh();
                         }
                     }
 
                     async disconnectedCallback() {
+                        this._webSkelProps?.revoke();
                         if (this.webSkelPresenter) {
                             if (this.webSkelPresenter.afterUnload) {
                                 await this.webSkelPresenter.afterUnload();
