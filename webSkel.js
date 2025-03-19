@@ -129,7 +129,6 @@ class WebSkel {
         this.defaultLoader.classList.add("spinner-default-style");
     }
 
-    /* without server request */
     async changeToDynamicPage(pageHtmlTagName, url, dataPresenterParams, skipHistoryState) {
         try {
             this.validateTagName(pageHtmlTagName);
@@ -181,11 +180,6 @@ class WebSkel {
 
     async interceptAppContentLinks(e) {
         let target = e.target || e.srcElement;
-        /*
-            Examples:
-            <a data-page="llm-page 1234"> LLM Page </a>
-            <a data-path="/default/posts/1234"></a>
-         */
         if (target.hasAttribute("data-page")) {
             let pageName = target.getAttribute("data-page");
             e.preventDefault();
@@ -332,43 +326,99 @@ class WebSkel {
     /**
      * Creates a custom element with reactive properties.
      * @param {string} elementName - The tag name of the custom element.
-     * @param {HTMLElement|string} [location=document.body] - The parent element or a selector where the element will be appended.
+     * @param {HTMLElement|string|null} [location=null] - The parent element or a selector where the element will be appended.
      * @param {Object} [attributes={}] - An object containing attributes to set on the element.
      * @param {Object} [props={}] - An object containing initial properties for reactive proxying.
      * @param {boolean} [observeProps=false] - If true, nested objects in props will be observed.
      * @returns {Proxy} A reactive proxy for the element's properties.
      */
 
-    static createElement(
+    createElement(
         elementName,
-        location = document.body,
-        attributes = {},
+        location = null,
         props = {},
+        attributes = {},
         observeProps = false,
     ) {
         const element = document.createElement(elementName);
+        const { proxy: propsProxy, revoke } = this.createReactiveProxy(props, observeProps, element);
+        element.setAttribute('data-presenter', elementName);
+        const handler = {
+            get(target, prop, receiver) {
+                if (prop === 'element') {
+                    return new WeakRef(element);
+                }
+                if (prop in propsProxy) {
+                    return Reflect.get(propsProxy, prop, receiver);
+                }
+                if (prop in element) {
+                    const value = element[prop];
+                    return typeof value === 'function' ? value.bind(element) : value;
+                }
+                return Reflect.get(target, prop, receiver);
+            },
+            set(target, prop, value, receiver) {
+                if (prop === 'element') {
+                    return false;
+                }
+                if (prop in propsProxy) {
+                    return Reflect.set(propsProxy, prop, value, receiver);
+                }
+                if (prop in element) {
+                    element[prop] = value;
+                    return true;
+                }
+                return Reflect.set(propsProxy, prop, value, receiver);
+            },
+            has(target, prop) {
+                return prop === 'element' || prop in propsProxy || prop in element;
+            },
+            ownKeys(target) {
+                const propsKeys = Reflect.ownKeys(propsProxy);
+                const elementKeys = Reflect.ownKeys(element);
+                return [...new Set([...propsKeys, ...elementKeys, 'element'])];
+            },
+            getOwnPropertyDescriptor(target, prop) {
+                if (prop === 'element') {
+                    return {
+                        value: new WeakRef(element),
+                        writable: false,
+                        enumerable: true,
+                        configurable: false
+                    };
+                }
+                if (prop in propsProxy) {
+                    return Reflect.getOwnPropertyDescriptor(propsProxy, prop);
+                }
+                if (prop in element) {
+                    return Reflect.getOwnPropertyDescriptor(element, prop);
+                }
+                return Reflect.getOwnPropertyDescriptor(target, prop);
+            }
+        };
 
-        const { proxy, revoke } = WebSkel.createReactiveProxy(props, observeProps, element);
+        const combinedProxy = new Proxy({}, handler);
 
         element._webSkelProps = {
             raw: props,
-            proxy,
+            proxy: propsProxy,
             revoke,
             observeProps
         };
 
-        element.setAttribute('data-presenter', elementName);
-
         Object.entries(attributes).forEach(([key, value]) => {
             element.setAttribute(key, value);
-        })
+        });
 
-        const parent = typeof location === 'string'
-            ? document.querySelector(location)
-            : location;
-        parent?.appendChild(element);
+        if (location instanceof HTMLElement) {
+            location?.appendChild(element);
+        } else if (typeof location === 'string') {
+            document.querySelector(location)?.appendChild(element);
+        } else if (location === null) {
+            // do not append to DOM, let the caller decide where to insert it
+        }
 
-        return proxy;
+        return combinedProxy;
     }
 
     /**
@@ -378,13 +428,13 @@ class WebSkel {
      * @param {HTMLElement} element - The element whose invalidate method is called on property changes.
      * @returns {{proxy: Proxy, revoke: Function}} An object containing the reactive proxy and a revoke function.
      */
-    static createReactiveProxy(target, observe, element) {
+    createReactiveProxy(target, observe, element) {
         const revokers = new Set();
 
         const handler = {
             set(obj, prop, value) {
                 if (observe && typeof value === 'object' && value !== null) {
-                    value = WebSkel.createReactiveProxy(value, observe, element).proxy;
+                    value = this.createReactiveProxy(value, observe, element).proxy;
                 }
 
                 const oldValue = obj[prop];
@@ -402,17 +452,17 @@ class WebSkel {
             }
         };
 
-        const { proxy, revoke } = Proxy.revocable(target, handler);
+        const {proxy, revoke} = Proxy.revocable(target, handler);
 
         if (observe) {
             for (const key in target) {
                 if (typeof target[key] === 'object' && target[key] !== null) {
-                    target[key] = WebSkel.createReactiveProxy(target[key], observe, element).proxy;
+                    target[key] = this.createReactiveProxy(target[key], observe, element).proxy;
                 }
             }
         }
 
-        return { proxy, revoke };
+        return {proxy, revoke};
     }
 
 
@@ -500,7 +550,7 @@ class WebSkel {
                             });
                             self.invalidateFn = invalidateProxy;
 
-                            self.webSkelPresenter = WebSkel.instance.ResourceManager.initialisePresenter(presenter, self, invalidateProxy,this.props);
+                            self.webSkelPresenter = WebSkel.instance.ResourceManager.initialisePresenter(presenter, self, invalidateProxy, this.props);
                         } else {
                             self.refresh();
                         }
