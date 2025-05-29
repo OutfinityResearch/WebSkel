@@ -1,5 +1,5 @@
 import {createTemplateArray, findDoubleDollarWords} from "./utils/template-utils.js";
-import {showModal} from "./utils/modal-utils.js";
+import {showModal,createReactiveModal} from "./utils/modal-utils.js";
 import {ResourceManager} from "./managers/ResourceManager.js";
 import {sanitize} from "./utils/dom-utils.js";
 
@@ -47,7 +47,9 @@ class WebSkel {
         WebSkel.instance = webSkel;
         return WebSkel.instance;
     }
-
+    async createReactiveModal(modalComponentName, componentProps, waitForData = false) {
+        retur
+    }
     async loadConfigs(jsonPath) {
         try {
             const response = await fetch(jsonPath);
@@ -229,7 +231,6 @@ class WebSkel {
             }
         };
 
-        // register listener for data-action attribute
         this._documentElement.addEventListener("click", async (event) => {
             let target = event.target;
             let stopPropagation = false;

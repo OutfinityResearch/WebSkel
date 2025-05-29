@@ -134,3 +134,64 @@ export async function showActionBox(targetElement, primaryKey, componentName, in
     document.addEventListener('click', clickHandler);
     return componentNode;
 }
+export async function createReactiveModal(modalComponentName, componentProps, waitForData = false) {
+    if(typeof componentProps === "boolean"){
+        waitForData = componentProps;
+        componentProps = undefined;
+    }
+
+    const bodyElement = document.querySelector("body");
+    const existingModalContainer = getClosestParentElement(bodyElement, "dialog");
+    if (existingModalContainer) {
+        existingModalContainer.close();
+        existingModalContainer.remove();
+    }
+
+    let modal = document.createElement("dialog");
+    modal.classList.add("modal", `${modalComponentName}-dialog`);
+
+    const webSkelInstance = window.WebSkel||assistOS.UI;
+    if (!webSkelInstance) {
+        throw new Error("WebSkel instance not found for reactive modal");
+    }
+
+    let component = webSkelInstance.configs.components.find(component => component.name === modalComponentName);
+
+    const componentProxy = webSkelInstance.createElement(
+        modalComponentName,
+        modal,
+        componentProps || {},
+        component?.presenterClassName ? { 'data-presenter': modalComponentName } : {},
+        true
+    );
+
+    Object.assign(modal, {
+        component: modalComponentName,
+        cssClass: modalComponentName,
+        componentProps: componentProps,
+        _componentProxy: componentProxy
+    });
+
+    const modalProxy = new Proxy(modal, {
+        get(target, prop) {
+            if (prop === 'props') {
+                return componentProxy;
+            }
+            return Reflect.get(target, prop);
+        }
+    });
+
+    bodyElement.appendChild(modal);
+    await modal.showModal();
+    modal.addEventListener("keydown", preventCloseOnEsc);
+
+    if(waitForData){
+        return new Promise((resolve)=>{
+            modal.addEventListener("close", (event)=>{
+                resolve(event.data);
+            });
+        });
+    }
+
+    return modalProxy;
+}
