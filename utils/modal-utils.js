@@ -78,14 +78,16 @@ export function removeActionBox(actionBox, instance){
     }
 }
 
-export async function showActionBox(targetElement, primaryKey, componentName, insertionMode) {
-    const existingComponentNode = document.getElementById(`${primaryKey}`);
+export async function showActionBox(targetElement, primaryKey, componentName, insertionMode, props = {}) {
+    //TODO: remove primaryKey, it is not used
+    const existingComponentNode = targetElement.parentNode.querySelector(componentName);
     if (existingComponentNode) {
         return null;
     }
     const componentNode = document.createElement(`${componentName}`);
-    /* We could use the id of the parent element instead and remove it here - TBD */
-    componentNode.setAttribute("id", primaryKey);
+    for(const [key, value] of Object.entries(props)) {
+        componentNode.setAttribute(`data-${key}`, value);
+    }
     let oldComponentNode;
     switch (insertionMode) {
         case "prepend":
