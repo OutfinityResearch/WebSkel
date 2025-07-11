@@ -19,7 +19,7 @@ export async function extractFormInformation(element, conditions) {
         if (element.multiple && element.tagName === "SELECT") {
             formData.data[element.name] = Array.from(element.selectedOptions).map(option => option.value);
         } else {
-            formData.data[element.name] = element.tagName === "CHECKBOX" ? element.checked : element.value;
+            formData.data[element.name] = element.tagName === "CHECKBOX" || (element.tagName === "INPUT" && element.type === "checkbox") ? element.checked : element.value;
         }
 
         if (element.getAttribute("type") === "file") {
