@@ -1,5 +1,5 @@
-import {createTemplateArray, findDoubleDollarWords} from "./utils/template-utils.js";
-import {showModal,createReactiveModal} from "./utils/modal-utils.js";
+import {createTemplateArray, findDoubleDollarWords, generateId} from "./utils/template-utils.js";
+import {showModal} from "./utils/modal-utils.js";
 import {ResourceManager} from "./managers/ResourceManager.js";
 import {sanitize} from "./utils/dom-utils.js";
 
@@ -47,9 +47,7 @@ class WebSkel {
         WebSkel.instance = webSkel;
         return WebSkel.instance;
     }
-    async createReactiveModal(modalComponentName, componentProps, waitForData = false) {
-        retur
-    }
+
     async loadConfigs(jsonPath) {
         try {
             const response = await fetch(jsonPath);
@@ -79,17 +77,8 @@ class WebSkel {
     }
 
     showLoading() {
-        function generateRandomId(length) {
-            const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let randomId = '';
-            for (let i = 0; i < length; i++) {
-                randomId += charset.charAt(Math.floor(Math.random() * charset.length));
-            }
-            return randomId;
-        }
-
         let loader = this.defaultLoader.cloneNode(true);
-        let id = generateRandomId(12);
+        let id = generateId(12);
         loader.setAttribute("data-id", id)
         if (this.loaderCount === 0) {
             document.body.appendChild(loader);

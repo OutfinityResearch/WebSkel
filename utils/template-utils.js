@@ -110,3 +110,10 @@ export function decodeBase64(base64EncodedData) {
         throw new Error('Failed to decode Base64 string.');
     }
 }
+export function generateId(length) {
+    const randomBytes = new Uint8Array(length);
+    crypto.getRandomValues(randomBytes);
+    return Array.from(randomBytes)
+        .map(byte => byte.toString(16).padStart(2, '0'))
+        .join('');
+}
