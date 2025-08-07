@@ -1,4 +1,4 @@
-import {createTemplateArray, findDoubleDollarWords, generateId} from "./utils/template-utils.js";
+import {createTemplateArray, findDoubleDollarWords} from "./utils/template-utils.js";
 import {showModal} from "./utils/modal-utils.js";
 import {ResourceManager} from "./managers/ResourceManager.js";
 import {sanitize} from "./utils/dom-utils.js";
@@ -78,7 +78,7 @@ class WebSkel {
 
     showLoading() {
         let loader = this.defaultLoader.cloneNode(true);
-        let id = generateId(12);
+        let id = crypto.randomUUID();
         loader.setAttribute("data-id", id)
         if (this.loaderCount === 0) {
             document.body.appendChild(loader);
