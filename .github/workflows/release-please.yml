@@ -5,6 +5,12 @@ on:
     branches:
       - master
       - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release"
+        required: false
+        default: "0.0.0"
 
 permissions:
   contents: write
