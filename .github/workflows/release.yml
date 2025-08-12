@@ -1,10 +1,8 @@
-name: Release
+name: Build and Attach Bundle to Release
 
 on:
-  push:
-    tags:
-      - 'v*'
-      - 'V*'
+  release:
+    types: [published]
 
 permissions:
   contents: write
@@ -30,15 +28,16 @@ jobs:
 
       - name: Archive dist
         run: |
-          tar -czf webskel-dist-${{ github.ref_name }}.tar.gz dist
-          zip -r webskel-dist-${{ github.ref_name }}.zip dist
+          tar -czf webskel-dist-${{ github.event.release.tag_name }}.tar.gz dist
+          zip -r webskel-dist-${{ github.event.release.tag_name }}.zip dist
 
-      - name: Create GitHub Release
+      - name: Upload assets to Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event.release.tag_name }}
           files: |
             dist/**
-            webskel-dist-${{ github.ref_name }}.tar.gz
-            webskel-dist-${{ github.ref_name }}.zip
+            webskel-dist-${{ github.event.release.tag_name }}.tar.gz
+            webskel-dist-${{ github.event.release.tag_name }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
