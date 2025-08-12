@@ -1,0 +1,62 @@
+/*
+ * Local build validation script
+ * - Runs `npm run build`
+ * - Verifies dist files exist
+ * - Imports ESM and requires UMD bundles to ensure they load
+ */
+
+const { execSync } = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+const { pathToFileURL } = require('node:url');
+
+async function main() {
+  const projectRoot = path.resolve(__dirname, '..');
+  const distDir = path.join(projectRoot, 'dist');
+  const esPath = path.join(distDir, 'webskel.es.js');
+  const umdPath = path.join(distDir, 'webskel.umd.js');
+
+  console.log('Building library with Vite...');
+  execSync('npm run build', { cwd: projectRoot, stdio: 'inherit' });
+
+  console.log('Verifying dist artifacts...');
+  for (const p of [esPath, umdPath]) {
+    if (!fs.existsSync(p)) {
+      throw new Error(`Expected build artifact missing: ${p}`);
+    }
+    const stats = fs.statSync(p);
+    if (stats.size === 0) {
+      throw new Error(`Build artifact is empty: ${p}`);
+    }
+  }
+
+  console.log('Importing ESM build...');
+  const esm = await import(pathToFileURL(esPath).href);
+  const esmExport = esm?.default ?? esm?.WebSkel;
+  if (typeof esmExport !== 'function') {
+    throw new Error('ESM export is not a class/function');
+  }
+  if (typeof esmExport.initialise !== 'function') {
+    throw new Error('ESM export does not expose static initialise()');
+  }
+
+  console.log('Requiring UMD build...');
+  // eslint-disable-next-line import/no-dynamic-require, global-require
+  const umd = require(umdPath);
+  const umdExport = umd?.default ?? umd?.WebSkel ?? umd; // UMD may export in different shapes
+  if (typeof umdExport !== 'function') {
+    throw new Error('UMD export is not a class/function');
+  }
+  if (typeof umdExport.initialise !== 'function') {
+    throw new Error('UMD export does not expose static initialise()');
+  }
+
+  console.log('Build validation passed. Dist artifacts are present and loadable.');
+}
+
+main().catch((err) => {
+  console.error('\nBuild validation failed:\n', err?.stack || err?.message || err);
+  process.exit(1);
+});
+
+
