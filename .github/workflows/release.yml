@@ -41,4 +41,4 @@ jobs:
             webskel-dist-${{ github.ref_name }}.tar.gz
             webskel-dist-${{ github.ref_name }}.zip
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
