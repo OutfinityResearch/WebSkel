@@ -41,11 +41,14 @@ jobs:
           mkdir -p releases
           cp -f dist/webskel.mjs releases/webskel.mjs
 
+      - name: Show git status
+        run: git status
+
       - name: Commit .mjs files into repo
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add releases/
+          git add releases/ dist/
           if git diff --cached --quiet; then
             echo "No .mjs changes to commit"
           else
