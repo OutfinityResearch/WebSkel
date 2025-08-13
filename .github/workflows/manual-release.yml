@@ -36,24 +36,25 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Copy .mjs files to releases folder
+      - name: Copy bundles to releases folder
         run: |
           mkdir -p releases
           cp -f dist/webskel.mjs releases/webskel.mjs
+          cp -f dist/webskel.umd.js releases/webskel.umd.js
 
       - name: Show git status
         run: git status
 
-      - name: Commit .mjs files into repo
+      - name: Commit bundles into repo
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add releases/ dist/
           if git diff --cached --quiet; then
-            echo "No .mjs changes to commit"
+            echo "No bundle changes to commit"
           else
-            echo "Committing .mjs files into releases/"
-            git commit -m "chore(release): add .mjs files for ${{ github.event.inputs.version }}"
+            echo "Committing bundles into releases/"
+            git commit -m "chore(release): add bundles for ${{ github.event.inputs.version }}"
             git push origin HEAD:${{ github.event.repository.default_branch }}
           fi
 
