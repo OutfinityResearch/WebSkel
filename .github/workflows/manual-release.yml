@@ -49,10 +49,24 @@ jobs:
           import * as formUtils from './utils/form-utils.js';
           import * as modalUtils from './utils/modal-utils.js';
           import * as templateUtils from './utils/template-utils.js';
+          const utils = {
+              browserUtils,
+              domUtils,
+              formUtils,
+              modalUtils,
+              templateUtils
+          };
 
+          WebSkel.prototype.loadUtils = async function() {
+              for (const utilBundle of Object.values(utils)) {
+                  for (const [fnName, fn] of Object.entries(utilBundle)) {
+                      this[fnName] = fn;
+                  }
+              }
+          };
           // Export everything for the bundle
           export default WebSkel;
-          export { 
+          export {
               ResourceManager,
               browserUtils,
               domUtils,
