@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/OutfinityResearch/WebSkel/compare/v1.1.0...v1.1.1) (2025-08-13)
+
+
+### Bug Fixes
+
+* trigger release ([a512f75](https://github.com/OutfinityResearch/WebSkel/commit/a512f751633adbc4dddc039b30c074489caee8bd))
+
 ## [1.1.0](https://github.com/OutfinityResearch/WebSkel/compare/v1.0.2...v1.1.0) (2025-08-12)
 
 
