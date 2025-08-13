@@ -1280,12 +1280,20 @@ var WebSkel = (() => {
     modalUtils: modal_utils_exports,
     templateUtils: template_utils_exports
   };
-  webSkel_default.prototype.loadUtils = async function() {
+  var originalInitialise = webSkel_default.initialise;
+  webSkel_default.initialise = async function(configsPath) {
+    if (webSkel_default.instance) {
+      return webSkel_default.instance;
+    }
+    let webSkel = new webSkel_default();
     for (const utilBundle of Object.values(utils)) {
       for (const [fnName, fn] of Object.entries(utilBundle)) {
-        this[fnName] = fn;
+        webSkel[fnName] = fn;
       }
     }
+    await webSkel.loadConfigs(configsPath);
+    webSkel_default.instance = webSkel;
+    return webSkel_default.instance;
   };
   var bundle_entry_default = webSkel_default;
   if (typeof globalThis !== "undefined") {
