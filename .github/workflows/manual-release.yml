@@ -39,17 +39,7 @@ jobs:
       - name: Copy .mjs files to releases folder
         run: |
           mkdir -p releases
-          if compgen -G "dist/**/*.mjs" > /dev/null || compgen -G "dist/*.mjs" > /dev/null; then
-            find dist -type f -name "*.mjs" -exec cp -f {} releases/ \;
-          elif compgen -G "dist/**/*.es.js" > /dev/null || compgen -G "dist/*.es.js" > /dev/null; then
-            echo "No .mjs found; copying .es.js as .mjs"
-            find dist -type f -name "*.es.js" | while read -r f; do
-              base=$(basename "$f" .es.js)
-              cp -f "$f" "releases/${base}.mjs"
-            done
-          else
-            echo "No .mjs or .es.js files found in dist"
-          fi
+          cp -f dist/webskel.mjs releases/webskel.mjs
 
       - name: Commit .mjs files into repo
         run: |
