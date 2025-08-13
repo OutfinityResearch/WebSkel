@@ -39,7 +39,7 @@ jobs:
       - name: Bundle ESM (inline utils)
         run: |
           mkdir -p dist
-          npx --yes esbuild releases/webskel.mjs \
+          npx --yes esbuild webSkel.js initDSUWallet.js managers/*.js utils/*.js \
             --bundle \
             --format=esm \
             --platform=browser \
@@ -47,7 +47,7 @@ jobs:
 
       - name: Bundle UMD (inline utils)
         run: |
-          npx --yes esbuild releases/webskel.mjs \
+          npx --yes esbuild webSkel.js initDSUWallet.js managers/*.js utils/*.js \
             --bundle \
             --format=iife \
             --global-name=WebSkel \
