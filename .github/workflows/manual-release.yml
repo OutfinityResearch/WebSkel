@@ -36,6 +36,24 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Bundle ESM (inline utils)
+        run: |
+          mkdir -p dist
+          npx --yes esbuild releases/webskel.mjs \
+            --bundle \
+            --format=esm \
+            --platform=browser \
+            --outfile=dist/webskel.mjs
+
+      - name: Bundle UMD (inline utils)
+        run: |
+          npx --yes esbuild releases/webskel.mjs \
+            --bundle \
+            --format=iife \
+            --global-name=WebSkel \
+            --platform=browser \
+            --outfile=dist/webskel.umd.js
+
       - name: Copy bundles to releases folder
         run: |
           mkdir -p releases
