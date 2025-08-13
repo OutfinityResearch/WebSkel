@@ -1273,6 +1273,20 @@ var WebSkel = (() => {
   }
 
   // bundle-entry.js
+  var utils = {
+    browserUtils: browser_utils_exports,
+    domUtils: dom_utils_exports,
+    formUtils: form_utils_exports,
+    modalUtils: modal_utils_exports,
+    templateUtils: template_utils_exports
+  };
+  webSkel_default.prototype.loadUtils = async function() {
+    for (const utilBundle of Object.values(utils)) {
+      for (const [fnName, fn] of Object.entries(utilBundle)) {
+        this[fnName] = fn;
+      }
+    }
+  };
   var bundle_entry_default = webSkel_default;
   if (typeof globalThis !== "undefined") {
     globalThis.WebSkel = webSkel_default;
