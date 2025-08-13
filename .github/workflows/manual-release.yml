@@ -36,10 +36,44 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Create bundle entry point
+        run: |
+          cat > bundle-entry.js << 'EOF'
+          // Bundle entry point that includes all WebSkel files
+          import WebSkel from './webSkel.js';
+          import { initDSUWallet } from './initDSUWallet.js';
+          import { ResourceManager } from './managers/ResourceManager.js';
+
+          // Import all utilities
+          import * as browserUtils from './utils/browser-utils.js';
+          import * as domUtils from './utils/dom-utils.js';
+          import * as formUtils from './utils/form-utils.js';
+          import * as modalUtils from './utils/modal-utils.js';
+          import * as templateUtils from './utils/template-utils.js';
+
+          // Export everything for the bundle
+          export default WebSkel;
+          export { 
+              initDSUWallet, 
+              ResourceManager,
+              browserUtils,
+              domUtils,
+              formUtils,
+              modalUtils,
+              templateUtils
+          };
+
+          // Also make WebSkel available globally for UMD builds
+          if (typeof globalThis !== 'undefined') {
+              globalThis.WebSkel = WebSkel;
+              globalThis.initDSUWallet = initDSUWallet;
+          }
+          EOF
+
       - name: Bundle ESM (inline utils)
         run: |
           mkdir -p dist
-          npx --yes esbuild webSkel.js initDSUWallet.js managers/*.js utils/*.js \
+          npx --yes esbuild bundle-entry.js \
             --bundle \
             --format=esm \
             --platform=browser \
@@ -47,7 +81,7 @@ jobs:
 
       - name: Bundle UMD (inline utils)
         run: |
-          npx --yes esbuild webSkel.js initDSUWallet.js managers/*.js utils/*.js \
+          npx --yes esbuild bundle-entry.js \
             --bundle \
             --format=iife \
             --global-name=WebSkel \
@@ -59,6 +93,9 @@ jobs:
           mkdir -p releases
           cp -f dist/webskel.mjs releases/webskel.mjs
           cp -f dist/webskel.umd.js releases/webskel.umd.js
+
+      - name: Clean up temporary files
+        run: rm -f bundle-entry.js
 
       - name: Show git status
         run: git status
