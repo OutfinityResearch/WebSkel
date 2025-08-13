@@ -28,6 +28,17 @@ jobs:
       - name: Build library
         run: npm run build
 
+      - name: Copy .mjs files to releases folder
+        run: |
+          mkdir -p releases
+          if compgen -G "dist/**/*.mjs" > /dev/null; then
+            find dist -type f -name "*.mjs" -exec cp -f --parents {} releases/ \;
+          elif compgen -G "dist/*.mjs" > /dev/null; then
+            cp -f dist/*.mjs releases/
+          else
+            echo "No .mjs files found in dist"
+          fi
+
       - name: Archive dist
         run: |
           tar -czf webskel-dist-${{ github.event.release.tag_name }}.tar.gz dist
@@ -43,7 +54,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add releases/webskel-dist.tar.gz releases/webskel-dist.zip
+          git add releases webskel-dist-${{ github.event.release.tag_name }}.tar.gz webskel-dist-${{ github.event.release.tag_name }}.zip
           if git diff --cached --quiet; then
             echo "No bundle changes to commit"
           else
