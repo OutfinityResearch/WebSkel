@@ -57,13 +57,23 @@ jobs:
               templateUtils
           };
 
-          WebSkel.prototype.loadUtils = async function() {
+          const originalInitialise = WebSkel.initialise;
+
+          WebSkel.initialise = async function(configsPath) {
+              if (WebSkel.instance) {
+                  return WebSkel.instance;
+              }
+              let webSkel = new WebSkel();
               for (const utilBundle of Object.values(utils)) {
                   for (const [fnName, fn] of Object.entries(utilBundle)) {
-                      this[fnName] = fn;
+                      webSkel[fnName] = fn;
                   }
               }
+              await webSkel.loadConfigs(configsPath);
+              WebSkel.instance = webSkel;
+              return WebSkel.instance;
           };
+
           // Export everything for the bundle
           export default WebSkel;
           export {
@@ -140,5 +150,4 @@ jobs:
           prerelease: ${{ github.event.inputs.prerelease }}
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
-
 
