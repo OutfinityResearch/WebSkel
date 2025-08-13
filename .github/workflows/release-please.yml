@@ -20,14 +20,24 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
+      - name: Manual release PR (release-as)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.version != '' && github.event.inputs.version != '0.0.0'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+        run: |
+          npx --yes release-please release-pr \
+            --release-as ${{ github.event.inputs.version }} \
+            --release-type node
       - uses: googleapis/release-please-action@v4
-        id: release
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.version == '' || github.event.inputs.version == '0.0.0'
+        id: release_auto
         with:
           release-type: node
           token: ${{ secrets.GIT_TOKEN }}
-      - name: Log release info
-        if: steps.release.outputs.release_created == 'true'
+      # No log step for manual CLI mode; outputs are not available
+      - name: Log release info (auto)
+        if: steps.release_auto.outputs.release_created == 'true'
         run: |
-          echo "Release created: ${{ steps.release.outputs.tag_name }}"
+          echo "Release created: ${{ steps.release_auto.outputs.tag_name }}"
 
 
