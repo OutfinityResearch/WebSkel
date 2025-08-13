@@ -41,7 +41,6 @@ jobs:
           cat > bundle-entry.js << 'EOF'
           // Bundle entry point that includes all WebSkel files
           import WebSkel from './webSkel.js';
-          import { initDSUWallet } from './initDSUWallet.js';
           import { ResourceManager } from './managers/ResourceManager.js';
 
           // Import all utilities
@@ -54,7 +53,6 @@ jobs:
           // Export everything for the bundle
           export default WebSkel;
           export { 
-              initDSUWallet, 
               ResourceManager,
               browserUtils,
               domUtils,
@@ -66,7 +64,6 @@ jobs:
           // Also make WebSkel available globally for UMD builds
           if (typeof globalThis !== 'undefined') {
               globalThis.WebSkel = WebSkel;
-              globalThis.initDSUWallet = initDSUWallet;
           }
           EOF
 

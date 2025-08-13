@@ -8,8 +8,7 @@
     ".": {
       "import": "./dist/webskel.es.js",
       "require": "./dist/webskel.umd.js"
-    },
-    "./initDSUWallet": "./initDSUWallet.js"
+    }
   },
   "files": [
     "dist",
