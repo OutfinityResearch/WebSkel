@@ -60,10 +60,14 @@ jobs:
           gh pr merge -R ${{ github.repository }} ${{ steps.find_pr.outputs.number }} --squash --admin --delete-branch || \
           gh pr merge -R ${{ github.repository }} ${{ steps.find_pr.outputs.number }} --squash --auto --delete-branch
 
-      - name: Create GitHub Release now
-        uses: googleapis/release-please-action@v4
-        with:
-          command: github-release
-          release-type: node
-          token: ${{ secrets.GIT_TOKEN }}
+      - name: Create GitHub Release now (CLI)
+        if: steps.find_pr.outputs.number != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+        run: |
+          npx --yes release-please github-release \
+            --release-type node \
+            --repo-url ${{ github.repository }} \
+            --target-branch ${{ github.event.repository.default_branch }} \
+            --token "$GITHUB_TOKEN"
 
