@@ -1,3 +1,4 @@
+// releases/webskel.mjs
 function w(o) {
   let e = /\$\$[\w\-_]+/g;
   return o.match(e) || [];
@@ -59,7 +60,7 @@ function $(o, e) {
     s += ` data-${i}="${e[i]}"`;
   }), d.instance.configs.components.find((i) => i.name === o).presenterClassName && (s += ` data-presenter="${o}"`), s === "" ? t.innerHTML = `<${o}/>` : t.innerHTML = `<${o}${s}/>`, t.classList.add("modal", `${o}-dialog`), t;
 }
-class b {
+var b = class {
   constructor() {
     this.loadedStyleSheets = /* @__PURE__ */ new Map(), this.components = {};
   }
@@ -109,7 +110,7 @@ class b {
       css: [],
       presenter: null,
       loadingPromise: null,
-      isPromiseFulfilled: !1
+      isPromiseFulfilled: false
     }, this.components[e.name].loadingPromise = (async () => {
       try {
         let t, s;
@@ -126,7 +127,7 @@ class b {
             const n = await import(a);
             this.registerPresenter(e.name, n[e.presenterClassName]);
           }
-        return this.components[e.name].isPromiseFulfilled = !0, { html: r, css: i };
+        return this.components[e.name].isPromiseFulfilled = true, { html: r, css: i };
       } catch (t) {
         throw t;
       }
@@ -138,15 +139,15 @@ class b {
   initialisePresenter(e, t, s, r = {}) {
     let i;
     try {
-      i = new this.components[t.componentName].presenter(t, s, r), t.isPresenterReady = !0, t.onPresenterReady();
+      i = new this.components[t.componentName].presenter(t, s, r), t.isPresenterReady = true, t.onPresenterReady();
     } catch (a) {
       showApplicationError("Error creating a presenter instance", `Encountered an error during the initialization of ${e} for component: ${t.componentName}`, a + ":" + a.stack.split(`
 `)[1]);
     }
     return i;
   }
-}
-class d {
+};
+var d = class _d {
   constructor() {
     this._appContent = {}, this.appServices = {}, this._documentElement = document, this.actionRegistry = {}, this.registerListeners(), this.ResourceManager = new b(), this.defaultLoader = document.createElement("dialog"), this.loaderCount = 0, this.defaultLoader.classList.add("spinner"), this.defaultLoader.classList.add("spinner-default-style"), window.showApplicationError = async (e, t, s) => await S("show-error-modal", {
       title: e,
@@ -155,9 +156,9 @@ class d {
     }), console.log("creating new app manager instance");
   }
   static async initialise(e) {
-    if (d.instance)
-      return d.instance;
-    let t = new d();
+    if (_d.instance)
+      return _d.instance;
+    let t = new _d();
     const s = [
       "./utils/dom-utils.js",
       "./utils/form-utils.js",
@@ -170,7 +171,7 @@ class d {
       for (const [a, n] of Object.entries(i))
         t[a] = n;
     }
-    return await t.loadConfigs(e), d.instance = t, d.instance;
+    return await t.loadConfigs(e), _d.instance = t, _d.instance;
   }
   async loadConfigs(e) {
     try {
@@ -193,7 +194,7 @@ class d {
     });
   }
   showLoading() {
-    let e = this.defaultLoader.cloneNode(!0), t = crypto.randomUUID();
+    let e = this.defaultLoader.cloneNode(true), t = crypto.randomUUID();
     return e.setAttribute("data-id", t), this.loaderCount === 0 ? (document.body.appendChild(e), e.showModal()) : this.loaderCount++, t;
   }
   hideLoading(e) {
@@ -291,17 +292,17 @@ class d {
     this._documentElement.addEventListener("click", this.interceptAppContentLinks.bind(this)), window.onpopstate = (e) => {
       e.state && e.state.relativeUrlContent && this.updateAppContent(e.state.relativeUrlContent);
     }, this._documentElement.addEventListener("click", async (e) => {
-      let t = e.target, s = !1;
+      let t = e.target, s = false;
       for (; t && t !== this._documentElement && !s; ) {
         if (t.hasAttribute("data-local-action")) {
-          e.preventDefault(), e.stopPropagation(), s = !0;
-          let r = t, i = !1;
+          e.preventDefault(), e.stopPropagation(), s = true;
+          let r = t, i = false;
           const a = t.getAttribute("data-local-action"), [n, ...l] = a.split(" ");
-          for (; i === !1; ) {
-            let u = !1, h;
-            for (; u === !1; ) {
+          for (; i === false; ) {
+            let u = false, h;
+            for (; u === false; ) {
               if (r.webSkelPresenter) {
-                u = !0, h = r.webSkelPresenter;
+                u = true, h = r.webSkelPresenter;
                 break;
               }
               if (r = r.parentElement, r === document) {
@@ -311,16 +312,16 @@ class d {
             }
             if (h[n] !== void 0)
               try {
-                r.webSkelPresenter[n](t, ...l), i = !0;
+                r.webSkelPresenter[n](t, ...l), i = true;
               } catch (f) {
                 console.error(f), await showApplicationError("Error executing action", "There is no action for the button to execute", `Encountered ${f}`);
                 return;
               }
             else
-              u = !1, r = r.parentElement;
+              u = false, r = r.parentElement;
           }
         } else if (t.hasAttribute("data-action")) {
-          e.preventDefault(), e.stopPropagation(), s = !0;
+          e.preventDefault(), e.stopPropagation(), s = true;
           const r = t.getAttribute("data-action"), [i, ...a] = r.split(" ");
           i ? this.callAction(i, t, ...a) : console.error(`${t} : data action attribute value should not be empty!`);
           break;
@@ -361,7 +362,7 @@ class d {
    * @param {boolean} [observeProps=false] - If true, nested objects in props will be observed.
    * @returns {Proxy} A reactive proxy for the element's properties.
    */
-  createElement(e, t = null, s = {}, r = {}, i = !1) {
+  createElement(e, t = null, s = {}, r = {}, i = false) {
     const a = document.createElement(e), { proxy: n, revoke: l } = this.createReactiveProxy(s, i, a);
     a.setAttribute("data-presenter", e);
     const u = {
@@ -377,7 +378,7 @@ class d {
         return Reflect.get(f, c, y);
       },
       set(f, c, y, p) {
-        return c === "element" ? !1 : c in n ? Reflect.set(n, c, y, p) : c in a ? (a[c] = y, !0) : Reflect.set(n, c, y, p);
+        return c === "element" ? false : c in n ? Reflect.set(n, c, y, p) : c in a ? (a[c] = y, true) : Reflect.set(n, c, y, p);
       },
       has(f, c) {
         return c === "element" || c in n || c in a;
@@ -389,9 +390,9 @@ class d {
       getOwnPropertyDescriptor(f, c) {
         return c === "element" ? {
           value: new WeakRef(a),
-          writable: !1,
-          enumerable: !0,
-          configurable: !1
+          writable: false,
+          enumerable: true,
+          configurable: false
         } : c in n ? Reflect.getOwnPropertyDescriptor(n, c) : c in a ? Reflect.getOwnPropertyDescriptor(a, c) : Reflect.getOwnPropertyDescriptor(f, c);
       }
     }, h = new Proxy({}, u);
@@ -416,10 +417,10 @@ class d {
       set(n, l, u) {
         t && typeof u == "object" && u !== null && (u = this.createReactiveProxy(u, t, s).proxy);
         const h = n[l];
-        return n[l] = u, Object.is(h, u) || s.invalidateProxy?.(), !0;
+        return n[l] = u, Object.is(h, u) || s.invalidateProxy?.(), true;
       },
       deleteProperty(n, l) {
-        return delete n[l], s.invalidateProxy?.(), !0;
+        return delete n[l], s.invalidateProxy?.(), true;
       }
     }, { proxy: i, revoke: a } = Proxy.revocable(e, r);
     if (t)
@@ -434,13 +435,13 @@ class d {
         constructor() {
           super(), this.variables = {}, this.componentName = e.name, this.props = {}, this.presenterReadyPromise = new Promise((t) => {
             this.onPresenterReady = t;
-          }), this.isPresenterReady = !1;
+          }), this.isPresenterReady = false;
         }
         invalidateProxy() {
           this.invalidateFn && this.invalidateFn();
         }
         async connectedCallback() {
-          this._webSkelProps && (this.props = this._webSkelProps.proxy), this.resources = await d.instance.ResourceManager.loadComponent(e), w(this.resources.html).forEach((i) => {
+          this._webSkelProps && (this.props = this._webSkelProps.proxy), this.resources = await _d.instance.ResourceManager.loadComponent(e), w(this.resources.html).forEach((i) => {
             i = i.slice(2), this.variables[i] = "";
           }), this.templateArray = m(this.resources.html);
           let s = this, r = null;
@@ -451,7 +452,7 @@ class d {
               const l = (h) => {
                 s.innerHTML = `Error rendering component: ${s.componentName}
 : ` + h + h.stack.split(`
-`)[1], console.error(h), d.instance.hideLoading();
+`)[1], console.error(h), _d.instance.hideLoading();
               }, u = async () => {
                 try {
                   await s.webSkelPresenter.beforeRender();
@@ -462,24 +463,24 @@ class d {
                   l(h);
                 }
               };
-              if (d.instance.showLoading(), n)
+              if (_d.instance.showLoading(), n)
                 try {
                   await n();
                 } catch (h) {
                   return l(h);
                 }
-              await u(), d.instance.hideLoading();
+              await u(), _d.instance.hideLoading();
             }, a = new Proxy(i, {
               apply: async function(n, l, u) {
                 return s.isPresenterReady || await s.presenterReadyPromise, Reflect.apply(n, l, u);
               }
             });
-            s.invalidateFn = a, s.webSkelPresenter = d.instance.ResourceManager.initialisePresenter(r, s, a, this.props);
+            s.invalidateFn = a, s.webSkelPresenter = _d.instance.ResourceManager.initialisePresenter(r, s, a, this.props);
           } else
             s.refresh();
         }
         async disconnectedCallback() {
-          this._webSkelProps?.revoke(), this.webSkelPresenter && this.webSkelPresenter.afterUnload && await this.webSkelPresenter.afterUnload(), this.resources && this.resources.css && await d.instance.ResourceManager.unloadStyleSheets(this.componentName);
+          this._webSkelProps?.revoke(), this.webSkelPresenter && this.webSkelPresenter.afterUnload && await this.webSkelPresenter.afterUnload(), this.resources && this.resources.css && await _d.instance.ResourceManager.unloadStyleSheets(this.componentName);
         }
         refresh() {
           let t = "";
@@ -490,7 +491,7 @@ class d {
       }
     );
   };
-}
+};
 export {
   d as default
 };
