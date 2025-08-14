@@ -1,1 +1,12 @@
 **/node_modules/** 
+**/dist/** 
+**/releases/** 
+**/package-lock.json
+**/package.json
+**/README.md
+**/LICENSE
+**/CHANGELOG.md
+**/CONTRIBUTING.md
+**/CODE_OF_CONDUCT.md
+**/PULL_REQUEST_TEMPLATE.md
+**/SECURITY.md
