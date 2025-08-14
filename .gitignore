@@ -1,6 +1,4 @@
 **/node_modules/** 
-**/dist/** 
-**/releases/** 
 **/package-lock.json
 **/package.json
 **/README.md
