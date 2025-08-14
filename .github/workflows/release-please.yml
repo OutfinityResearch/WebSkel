@@ -43,20 +43,15 @@ jobs:
           echo "Checking bundle sizes:"
           du -h dist/*.mjs dist/*.umd.js
           echo ""
-          echo "Checking that main.mjs contains utilities:"
-          grep -c "export" dist/main.mjs || echo "No exports found in main.mjs"
-          echo ""
-          echo "Checking that webskel.mjs contains main class:"
+          echo "Checking that webskel.mjs contains all utilities:"
           grep -c "export" dist/webskel.mjs || echo "No exports found in webskel.mjs"
 
-      - name: Copy bundles to releases folder
+      - name: Copy bundles to releases folder (overwrite existing)
         run: |
           mkdir -p releases
           cp -f dist/webskel.mjs releases/webskel.mjs
           cp -f dist/webskel.umd.js releases/webskel.umd.js
-          cp -f dist/main.mjs releases/main.mjs
-          cp -f dist/main.umd.js releases/main.umd.js
-          echo "Bundles copied to releases folder:"
+          echo "Bundles copied to releases folder (overwriting existing files):"
           ls -la releases/
 
       - name: Commit bundles
