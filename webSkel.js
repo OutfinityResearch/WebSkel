@@ -55,10 +55,6 @@ class WebSkel {
             const response = await fetch(jsonPath);
             const config = await response.json();
             this.configs = config;
-            for (const service of config.services) {
-                const ServiceModule = await import(service.path);
-                this.initialiseService(ServiceModule[service.name]);
-            }
             for (const component of config.components) {
                 await this.defineComponent(component);
             }
@@ -69,14 +65,7 @@ class WebSkel {
     }
 
 
-    initialiseService(instance) {
-        let service = new instance;
-        const methodNames = Object.getOwnPropertyNames(instance.prototype)
-            .filter(method => method !== 'constructor');
-        methodNames.forEach(methodName => {
-            this.appServices[methodName] = service[methodName].bind(service);
-        });
-    }
+
 
     showLoading() {
         let loader = this.defaultLoader.cloneNode(true);
