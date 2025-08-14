@@ -3,11 +3,39 @@
   "version": "1.1.1",
   "description": "WebSkel is a minimal, JavaScript-based framework designed to facilitate the development of web applications using web components. It provides a set of utilities and services that assist developers in managing and controlling the behaviour of their applications. WebSkel implements the MVP (Model-View-Presenter) pattern, enabling developers to create views as web components, presenters in JavaScript, and models as JavaScript objects. The presenter is responsible for populating the view with data from the models. ## Features",
   "main": "dist/webskel.umd.js",
-  "module": "dist/webskel.es.js",
+  "module": "dist/webskel.mjs",
   "exports": {
     ".": {
-      "import": "./dist/webskel.es.js",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.umd.js"
+    },
+    "./webskel": {
+      "import": "./dist/webskel.mjs",
       "require": "./dist/webskel.umd.js"
+    },
+    "./dom-utils": {
+      "import": "./dist/dom-utils.mjs",
+      "require": "./dist/dom-utils.umd.js"
+    },
+    "./modal-utils": {
+      "import": "./dist/modal-utils.mjs",
+      "require": "./dist/modal-utils.umd.js"
+    },
+    "./form-utils": {
+      "import": "./dist/form-utils.mjs",
+      "require": "./dist/form-utils.umd.js"
+    },
+    "./template-utils": {
+      "import": "./dist/template-utils.mjs",
+      "require": "./dist/template-utils.umd.js"
+    },
+    "./browser-utils": {
+      "import": "./dist/browser-utils.mjs",
+      "require": "./dist/browser-utils.umd.js"
+    },
+    "./resource-manager": {
+      "import": "./dist/resource-manager.mjs",
+      "require": "./dist/resource-manager.umd.js"
     }
   },
   "files": [
