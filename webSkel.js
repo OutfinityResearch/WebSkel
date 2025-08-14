@@ -140,7 +140,7 @@ class WebSkel {
                 const path = ["#", url].join("");
                 window.history.pushState({ pageHtmlTagName, relativeUrlContent: result }, path.toString(), path);
             }
-            this.updateAppContent(result);
+            await this.updateAppContent(result);
         } catch (error) {
             console.error("Failed to change page", error);
         } finally {
@@ -163,7 +163,7 @@ class WebSkel {
         const loadingId = this.showLoading();
         try {
             const pageContent = await this.fetchTextResult(pageUrl, skipHistoryState);
-            this.updateAppContent(pageContent);
+            await this.updateAppContent(pageContent);
         } catch (error) {
             console.log("Failed to change page", error);
         } finally {
@@ -189,7 +189,7 @@ class WebSkel {
         this._appContent = elem;
     }
 
-    updateAppContent(content) {
+    async updateAppContent(content) {
         try {
             this.preventExternalResources(content);
         } catch (e) {
