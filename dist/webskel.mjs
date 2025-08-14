@@ -1,221 +1,4 @@
-function w(r) {
-  let e = /\$\$[\w\-_]+/g;
-  return r.match(e) || [];
-}
-function E(r) {
-  let e = 0;
-  const t = 0, n = 1;
-  function a(l) {
-    return !/^[a-zA-Z0-9_\-$]$/.test(l);
-  }
-  function i(l) {
-    return r[l] !== "$" || r[l + 1] !== "$" ? t : n;
-  }
-  let o = [], s = 0;
-  for (; s < r.length; ) {
-    for (; !i(s) && s < r.length; )
-      s++;
-    for (o.push(r.slice(e, s)), e = s; !a(r[s]) && s < r.length; )
-      s++;
-    o.push(r.slice(e, s)), e = s;
-  }
-  return o;
-}
-function x(r) {
-  if (!r) {
-    console.error("moveCursorToEnd: No element provided");
-    return;
-  }
-  if (document.activeElement !== r && r.focus(), typeof window.getSelection < "u" && typeof document.createRange < "u") {
-    const e = document.createRange();
-    e.selectNodeContents(r), e.collapse(!1);
-    const t = window.getSelection();
-    t.removeAllRanges(), t.addRange(e);
-  } else if (typeof document.body.createTextRange < "u") {
-    const e = document.body.createTextRange();
-    e.moveToElementText(r), e.collapse(!1), e.select();
-  }
-}
-function g(r, e, t) {
-  let n = null;
-  for (; r; ) {
-    if (r.matches(e)) {
-      n = r;
-      break;
-    } else if (t && r.matches(t))
-      break;
-    r = r.parentElement;
-  }
-  return n;
-}
-function b(r, e, t = "", n = !1) {
-  const a = /* @__PURE__ */ new Set();
-  if (!(r instanceof Element))
-    throw new TypeError("The first argument must be a DOM Element.");
-  if (typeof e != "string" || e.trim() === "")
-    throw new TypeError("The second argument must be a non-empty string.");
-  if (r.matches(e) && !n)
-    return r;
-  a.add(r);
-  let i = r;
-  for (; i; ) {
-    const o = i.parentElement;
-    if (o) {
-      let s = o.firstElementChild;
-      for (; s; ) {
-        if (!a.has(s)) {
-          if (a.add(s), s !== i && s.matches(e))
-            return s;
-          if (s.children.length > 0) {
-            const l = [s.firstElementChild];
-            for (; l.length > 0; ) {
-              const d = l.shift();
-              if (!a.has(d)) {
-                if (a.add(d), d.matches(e))
-                  return d;
-                let c = d.nextElementSibling;
-                for (; c; )
-                  l.push(c), c = c.nextElementSibling;
-                d.firstElementChild && l.push(d.firstElementChild);
-              }
-            }
-          }
-        }
-        s = s.nextElementSibling;
-      }
-    }
-    if (i = o, i && !a.has(i)) {
-      if (a.add(i), i.matches(e))
-        return i;
-      if (t && i.matches(t))
-        break;
-    }
-  }
-  return null;
-}
-function A(r) {
-  const e = (r.match(/\//g) || []).length;
-  return !(e > 1 || e === 1 && r.charAt(r.length - 1) !== "/");
-}
-function M(r) {
-  return r != null && typeof r == "string" ? r.replace(/&nbsp;/g, " ").replace(/&#13;/g, `
-`).replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">") : "";
-}
-function y(r) {
-  return r != null && typeof r == "string" ? r.replace(/&/g, "&amp;").replace(/'/g, "&#39;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\r\n/g, "&#13;").replace(/[\r\n]/g, "&#13;").replace(/\s/g, "&nbsp;") : r;
-}
-function T(r) {
-  return r != null && typeof r == "string" ? r.replace(/\u00A0/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim() : r;
-}
-function N(r) {
-  return r.replace(/^[\u00A0\s]+|[\u00A0\s]+$/g, "").trim();
-}
-function D(r) {
-  return g(r, ".app-container");
-}
-function P(r, e) {
-  if (!r || !(r instanceof HTMLElement))
-    return console.error("getClosestParentWithPresenter: Invalid or no element provided"), null;
-  const t = e ? `[data-presenter="${e}"]` : "[data-presenter]";
-  return b(r, t, "", !0);
-}
-function O(r) {
-  if (!r || !(r instanceof HTMLElement))
-    return console.error("invalidateParentElement: Invalid or no element provided"), null;
-  S(P(r));
-}
-function S(r) {
-  if (!r || !(r instanceof HTMLElement)) {
-    console.error("refreshElement: Invalid or no element provided");
-    return;
-  }
-  if (!r.webSkelPresenter || typeof r.webSkelPresenter.invalidate != "function") {
-    console.error("refreshElement: Element does not have a webSkelPresenter with an invalidate method");
-    return;
-  }
-  r.webSkelPresenter.invalidate();
-}
-async function C(r, e, t) {
-  typeof e == "boolean" && (t = e, e = void 0);
-  const n = document.querySelector("body"), a = g(n, "dialog");
-  a && (a.close(), a.remove());
-  const i = Object.assign($(r, e), {
-    component: r,
-    cssClass: r,
-    componentProps: e
-  });
-  return n.appendChild(i), await i.showModal(), i.addEventListener("keydown", v), t ? new Promise((o) => {
-    i.addEventListener("close", (s) => {
-      o(s.data);
-    });
-  }) : i;
-}
-function v(r) {
-  r.key === "Escape" && r.preventDefault();
-}
-function $(r, e) {
-  let t = document.createElement("dialog"), n = "";
-  return e !== void 0 && Object.keys(e).forEach((i) => {
-    n += ` data-${i}="${e[i]}"`;
-  }), f.instance.configs.components.find((i) => i.name === r).presenterClassName && (n += ` data-presenter="${r}"`), n === "" ? t.innerHTML = `<${r}/>` : t.innerHTML = `<${r}${n}/>`, t.classList.add("modal", `${r}-dialog`), t;
-}
-function j(r, e) {
-  const t = g(r, "dialog");
-  if (e !== void 0) {
-    let n = new Event("close", {
-      bubbles: !0,
-      cancelable: !0
-    });
-    n.data = e, t.dispatchEvent(n);
-  }
-  t && (t.close(), t.remove());
-}
-function L(r, e) {
-  document.removeEventListener("click", r.clickHandler), r.remove(), e !== void 0 && delete e.actionBox;
-}
-async function H(r, e, t, n, a = {}) {
-  if (r.parentNode.querySelector(t))
-    return null;
-  const o = document.createElement(`${t}`);
-  for (const [d, c] of Object.entries(a))
-    o.setAttribute(`data-${d}`, c);
-  let s;
-  switch (n) {
-    case "prepend":
-      r.parentNode.insertBefore(o, r);
-      break;
-    case "append":
-      r.parentNode.appendChild(o);
-      break;
-    case "replace":
-      s = r;
-      const d = s.parentNode;
-      d.removeChild(s), d.appendChild(o);
-      break;
-    case "replace-all":
-      s = r.parentNode;
-      const c = s;
-      s = c.innerHTML, c.innerHTML = "", c.appendChild(o);
-      break;
-    default:
-      console.error(`Invalid Insertion Mode: ${n}. No changes to the DOM have been made`);
-      return;
-  }
-  let l = (d) => {
-    if (o && !o.contains(d.target)) {
-      if (n === "replace" && s) {
-        const c = o.parentNode;
-        c.removeChild(o), c.appendChild(s);
-      } else if (n === "replace-all" && s) {
-        const c = o.parentNode;
-        c.innerHTML = s;
-      }
-      L(o);
-    }
-  };
-  return o.clickHandler = l, document.addEventListener("click", l), o;
-}
-class k {
+class x {
   constructor() {
     this.loadedStyleSheets = /* @__PURE__ */ new Map(), this.components = {};
   }
@@ -302,9 +85,403 @@ class k {
     return i;
   }
 }
+function L(r) {
+  if (!r) {
+    console.error("moveCursorToEnd: No element provided");
+    return;
+  }
+  if (document.activeElement !== r && r.focus(), typeof window.getSelection < "u" && typeof document.createRange < "u") {
+    const e = document.createRange();
+    e.selectNodeContents(r), e.collapse(!1);
+    const t = window.getSelection();
+    t.removeAllRanges(), t.addRange(e);
+  } else if (typeof document.body.createTextRange < "u") {
+    const e = document.body.createTextRange();
+    e.moveToElementText(r), e.collapse(!1), e.select();
+  }
+}
+function g(r, e, t) {
+  let n = null;
+  for (; r; ) {
+    if (r.matches(e)) {
+      n = r;
+      break;
+    } else if (t && r.matches(t))
+      break;
+    r = r.parentElement;
+  }
+  return n;
+}
+function w(r, e, t = "", n = !1) {
+  const a = /* @__PURE__ */ new Set();
+  if (!(r instanceof Element))
+    throw new TypeError("The first argument must be a DOM Element.");
+  if (typeof e != "string" || e.trim() === "")
+    throw new TypeError("The second argument must be a non-empty string.");
+  if (r.matches(e) && !n)
+    return r;
+  a.add(r);
+  let i = r;
+  for (; i; ) {
+    const o = i.parentElement;
+    if (o) {
+      let s = o.firstElementChild;
+      for (; s; ) {
+        if (!a.has(s)) {
+          if (a.add(s), s !== i && s.matches(e))
+            return s;
+          if (s.children.length > 0) {
+            const l = [s.firstElementChild];
+            for (; l.length > 0; ) {
+              const d = l.shift();
+              if (!a.has(d)) {
+                if (a.add(d), d.matches(e))
+                  return d;
+                let c = d.nextElementSibling;
+                for (; c; )
+                  l.push(c), c = c.nextElementSibling;
+                d.firstElementChild && l.push(d.firstElementChild);
+              }
+            }
+          }
+        }
+        s = s.nextElementSibling;
+      }
+    }
+    if (i = o, i && !a.has(i)) {
+      if (a.add(i), i.matches(e))
+        return i;
+      if (t && i.matches(t))
+        break;
+    }
+  }
+  return null;
+}
+function R(r) {
+  const e = (r.match(/\//g) || []).length;
+  return !(e > 1 || e === 1 && r.charAt(r.length - 1) !== "/");
+}
+function A(r) {
+  return r != null && typeof r == "string" ? r.replace(/&nbsp;/g, " ").replace(/&#13;/g, `
+`).replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">") : "";
+}
+function y(r) {
+  return r != null && typeof r == "string" ? r.replace(/&/g, "&amp;").replace(/'/g, "&#39;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\r\n/g, "&#13;").replace(/[\r\n]/g, "&#13;").replace(/\s/g, "&nbsp;") : r;
+}
+function M(r) {
+  return r != null && typeof r == "string" ? r.replace(/\u00A0/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim() : r;
+}
+function T(r) {
+  return r.replace(/^[\u00A0\s]+|[\u00A0\s]+$/g, "").trim();
+}
+function O(r) {
+  return g(r, ".app-container");
+}
+function b(r, e) {
+  if (!r || !(r instanceof HTMLElement))
+    return console.error("getClosestParentWithPresenter: Invalid or no element provided"), null;
+  const t = e ? `[data-presenter="${e}"]` : "[data-presenter]";
+  return w(r, t, "", !0);
+}
+function j(r) {
+  if (!r || !(r instanceof HTMLElement))
+    return console.error("invalidateParentElement: Invalid or no element provided"), null;
+  E(b(r));
+}
+function E(r) {
+  if (!r || !(r instanceof HTMLElement)) {
+    console.error("refreshElement: Invalid or no element provided");
+    return;
+  }
+  if (!r.webSkelPresenter || typeof r.webSkelPresenter.invalidate != "function") {
+    console.error("refreshElement: Element does not have a webSkelPresenter with an invalidate method");
+    return;
+  }
+  r.webSkelPresenter.invalidate();
+}
+const N = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  customTrim: T,
+  getClosestParentElement: g,
+  getClosestParentWithPresenter: b,
+  getMainAppContainer: O,
+  invalidateParentElement: j,
+  moveCursorToEnd: L,
+  normalizeSpaces: M,
+  notBasePage: R,
+  refreshElement: E,
+  reverseQuerySelector: w,
+  sanitize: y,
+  unsanitize: A
+}, Symbol.toStringTag, { value: "Module" }));
+async function _(r, e) {
+  const t = g(r, "form"), n = {
+    data: {},
+    elements: {},
+    isValid: !1
+  };
+  typeof t.checkValidity == "function" && (n.isValid = t.checkValidity());
+  const a = [...t.querySelectorAll("[name]:not([type=hidden])")];
+  for (const i of a) {
+    if (i.disabled)
+      continue;
+    if (i.multiple && i.tagName === "SELECT" ? n.data[i.name] = Array.from(i.selectedOptions).map((l) => l.value) : n.data[i.name] = i.tagName === "CHECKBOX" || i.tagName === "INPUT" && i.type === "checkbox" ? i.checked : i.value, i.getAttribute("type") === "file")
+      if (i.multiple)
+        n.data[i.name] = i.files;
+      else
+        try {
+          i.files.length > 0 && (n.data[i.name] = await S(i.files[0]));
+        } catch (l) {
+          console.log(l);
+        }
+    let o = !0;
+    if (i.setCustomValidity(""), typeof i.checkValidity == "function" ? o = i.checkValidity() : typeof i.getInputElement == "function" && (o = (await i.getInputElement()).checkValidity()), o === !0 && e) {
+      let l = i.getAttribute("data-condition");
+      l && (o = e[l].fn(i, n), o ? i.setCustomValidity("") : (i.setCustomValidity(e[l].errorMessage), n.isValid = !1));
+    }
+    n.elements[i.name] = {
+      isValid: o,
+      element: i
+    };
+    let s = document.querySelector(`[data-id = '${i.getAttribute("id")}' ]`);
+    s && (o ? s.classList.remove("input-invalid") : s.classList.add("input-invalid"));
+  }
+  t.checkValidity() || t.reportValidity();
+  for (let i of Object.keys(n.data))
+    n.elements[i] && n.elements[i].element && n.elements[i].element.hasAttribute("data-no-sanitize") || (n.data[i] = y(n.data[i]));
+  return n;
+}
+async function S(r) {
+  let e = "", t = new FileReader();
+  return await new Promise((n, a) => {
+    t.onload = function() {
+      e = t.result, n(e);
+    }, r ? t.readAsDataURL(r) : a("No file given as input at imageUpload");
+  });
+}
+async function D(r) {
+  let e = "", t = new FileReader();
+  return await new Promise((n, a) => {
+    t.onload = function() {
+      e = t.result, n(e);
+    }, r ? t.readAsText(r) : a("No file given as input");
+  });
+}
+const H = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  extractFormInformation: _,
+  imageUpload: S,
+  uploadFileAsText: D
+}, Symbol.toStringTag, { value: "Module" }));
+async function P(r, e, t) {
+  typeof e == "boolean" && (t = e, e = void 0);
+  const n = document.querySelector("body"), a = g(n, "dialog");
+  a && (a.close(), a.remove());
+  const i = Object.assign(V(r, e), {
+    component: r,
+    cssClass: r,
+    componentProps: e
+  });
+  return n.appendChild(i), await i.showModal(), i.addEventListener("keydown", v), t ? new Promise((o) => {
+    i.addEventListener("close", (s) => {
+      o(s.data);
+    });
+  }) : i;
+}
+function v(r) {
+  r.key === "Escape" && r.preventDefault();
+}
+function V(r, e) {
+  let t = document.createElement("dialog"), n = "";
+  return e !== void 0 && Object.keys(e).forEach((i) => {
+    n += ` data-${i}="${e[i]}"`;
+  }), f.instance.configs.components.find((i) => i.name === r).presenterClassName && (n += ` data-presenter="${r}"`), n === "" ? t.innerHTML = `<${r}/>` : t.innerHTML = `<${r}${n}/>`, t.classList.add("modal", `${r}-dialog`), t;
+}
+function I(r, e) {
+  const t = g(r, "dialog");
+  if (e !== void 0) {
+    let n = new Event("close", {
+      bubbles: !0,
+      cancelable: !0
+    });
+    n.data = e, t.dispatchEvent(n);
+  }
+  t && (t.close(), t.remove());
+}
+function C(r, e) {
+  document.removeEventListener("click", r.clickHandler), r.remove(), e !== void 0 && delete e.actionBox;
+}
+async function U(r, e, t, n, a = {}) {
+  if (r.parentNode.querySelector(t))
+    return null;
+  const o = document.createElement(`${t}`);
+  for (const [d, c] of Object.entries(a))
+    o.setAttribute(`data-${d}`, c);
+  let s;
+  switch (n) {
+    case "prepend":
+      r.parentNode.insertBefore(o, r);
+      break;
+    case "append":
+      r.parentNode.appendChild(o);
+      break;
+    case "replace":
+      s = r;
+      const d = s.parentNode;
+      d.removeChild(s), d.appendChild(o);
+      break;
+    case "replace-all":
+      s = r.parentNode;
+      const c = s;
+      s = c.innerHTML, c.innerHTML = "", c.appendChild(o);
+      break;
+    default:
+      console.error(`Invalid Insertion Mode: ${n}. No changes to the DOM have been made`);
+      return;
+  }
+  let l = (d) => {
+    if (o && !o.contains(d.target)) {
+      if (n === "replace" && s) {
+        const c = o.parentNode;
+        c.removeChild(o), c.appendChild(s);
+      } else if (n === "replace-all" && s) {
+        const c = o.parentNode;
+        c.innerHTML = s;
+      }
+      C(o);
+    }
+  };
+  return o.clickHandler = l, document.addEventListener("click", l), o;
+}
+async function F(r, e, t = !1) {
+  typeof e == "boolean" && (t = e, e = void 0);
+  const n = document.querySelector("body"), a = g(n, "dialog");
+  a && (a.close(), a.remove());
+  let i = document.createElement("dialog");
+  i.classList.add("modal", `${r}-dialog`);
+  const o = window.WebSkel || assistOS.UI;
+  if (!o)
+    throw new Error("WebSkel instance not found for reactive modal");
+  let s = o.configs.components.find((c) => c.name === r);
+  const l = o.createElement(
+    r,
+    i,
+    e || {},
+    s?.presenterClassName ? { "data-presenter": r } : {},
+    !0
+  );
+  Object.assign(i, {
+    component: r,
+    cssClass: r,
+    componentProps: e,
+    _componentProxy: l
+  });
+  const d = new Proxy(i, {
+    get(c, h) {
+      return h === "props" ? l : Reflect.get(c, h);
+    }
+  });
+  return n.appendChild(i), await i.showModal(), i.addEventListener("keydown", v), t ? new Promise((c) => {
+    i.addEventListener("close", (h) => {
+      c(h.data);
+    });
+  }) : d;
+}
+const B = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  closeModal: I,
+  createReactiveModal: F,
+  removeActionBox: C,
+  showActionBox: U,
+  showModal: P
+}, Symbol.toStringTag, { value: "Module" }));
+function $(r) {
+  let e = /\$\$[\w\-_]+/g;
+  return r.match(e) || [];
+}
+function k(r) {
+  let e = 0;
+  const t = 0, n = 1;
+  function a(l) {
+    return !/^[a-zA-Z0-9_\-$]$/.test(l);
+  }
+  function i(l) {
+    return r[l] !== "$" || r[l + 1] !== "$" ? t : n;
+  }
+  let o = [], s = 0;
+  for (; s < r.length; ) {
+    for (; !i(s) && s < r.length; )
+      s++;
+    for (o.push(r.slice(e, s)), e = s; !a(r[s]) && s < r.length; )
+      s++;
+    o.push(r.slice(e, s)), e = s;
+  }
+  return o;
+}
+function q(r, e) {
+  if (typeof r != "string" || r.trim() === "")
+    throw new Error("Input data must be a non-empty string.");
+  if (typeof e != "string" || e.trim() === "")
+    throw new Error("MIME type must be a non-empty string.");
+  try {
+    return `data:${e};base64,` + window.btoa(r);
+  } catch (t) {
+    throw console.error("Error encoding data to Base64:", t), new Error("Failed to encode data to Base64.");
+  }
+}
+function z(r) {
+  if (typeof r != "string")
+    throw new Error("Input must be a Base64 encoded string.");
+  let e = r.split(","), t = e[0].startsWith("data:") ? e[1] : e[0];
+  if (!t)
+    throw new Error("Invalid Base64 data format.");
+  try {
+    return atob(t);
+  } catch (n) {
+    throw console.error("Error decoding Base64 string:", n), new Error("Failed to decode Base64 string.");
+  }
+}
+const K = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  createTemplateArray: k,
+  decodeBase64: z,
+  encodeToBase64: q,
+  findDoubleDollarWords: $
+}, Symbol.toStringTag, { value: "Module" }));
+function Q() {
+  let r = navigator.userAgent, e, t = r.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+  return /trident/i.test(t[1]) ? (e = /\brv[ :]+(\d+)/g.exec(r) || [], { name: "IE", version: e[1] || "" }) : t[1] === "Chrome" && (e = r.match(/\bOPR|Edge\/(\d+)/), e != null) ? { name: "Opera", version: e[1] } : (t = t[2] ? [t[1], t[2]] : [navigator.appName, navigator.appVersion, "-?"], (e = r.match(/version\/(\d+)/i)) != null && t.splice(1, 1, e[1]), {
+    name: t[0],
+    version: t[1]
+  });
+}
+function X() {
+  const r = window.location.search, e = new URLSearchParams(r);
+  let t = {};
+  for (let n of e.keys())
+    t[n] = e.get(n);
+  return t;
+}
+function Z() {
+  const r = window.location.hash.split("?");
+  let e = {};
+  if (r[1]) {
+    const t = new URLSearchParams(r[1]);
+    for (const [n, a] of t)
+      e[n] = a;
+    return e;
+  }
+  return e;
+}
+const G = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  getBrowser: Q,
+  getHashParams: Z,
+  getURLParams: X
+}, Symbol.toStringTag, { value: "Module" }));
 class f {
   constructor() {
-    this._appContent = {}, this.appServices = {}, this._documentElement = document, this.actionRegistry = {}, this.registerListeners(), this.ResourceManager = new k(), this.defaultLoader = document.createElement("dialog"), this.loaderCount = 0, this.defaultLoader.classList.add("spinner"), this.defaultLoader.classList.add("spinner-default-style"), window.showApplicationError = async (e, t, n) => await C("show-error-modal", {
+    this._appContent = {}, this.appServices = {}, this._documentElement = document, this.actionRegistry = {}, this.registerListeners(), this.ResourceManager = new x(), this.defaultLoader = document.createElement("dialog"), this.loaderCount = 0, this.defaultLoader.classList.add("spinner"), this.defaultLoader.classList.add("spinner-default-style"), window.showApplicationError = async (e, t, n) => await P("show-error-modal", {
       title: e,
       message: t,
       technical: n
@@ -315,17 +492,15 @@ class f {
       return f.instance;
     let t = new f();
     const n = [
-      "./utils/dom-utils.js",
-      "./utils/form-utils.js",
-      "./utils/modal-utils.js",
-      "./utils/template-utils.js",
-      "./utils/browser-utils.js"
+      N,
+      H,
+      B,
+      K,
+      G
     ];
-    for (const a of n) {
-      const i = await import(a);
-      for (const [o, s] of Object.entries(i))
-        t[o] = s;
-    }
+    for (const a of n)
+      for (const [i, o] of Object.entries(a))
+        t[i] = o;
     return await t.loadConfigs(e), f.instance = t, f.instance;
   }
   async loadConfigs(e) {
@@ -339,7 +514,7 @@ class f {
       for (const a of n.components)
         await this.defineComponent(a);
     } catch (t) {
-      console.error(t), await showApplicationError("Error loading configs", "Error loading configs", `Encountered ${t} while trying loading webSkel configs`);
+      console.error(t), await window.showApplicationError("Error loading configs", "Error loading configs", `Encountered ${t} while trying loading webSkel configs`);
     }
   }
   initialiseService(e) {
@@ -375,7 +550,7 @@ class f {
     try {
       this.validateTagName(e);
     } catch (s) {
-      showApplicationError(s, s, s), console.error(s);
+      await window.showApplicationError(s, s, s), console.error(s);
       return;
     }
     const i = this.showLoading();
@@ -387,7 +562,7 @@ class f {
         const l = ["#", t].join("");
         window.history.pushState({ pageHtmlTagName: e, relativeUrlContent: s }, l.toString(), l);
       }
-      this.updateAppContent(s);
+      await this.updateAppContent(s);
     } catch (s) {
       console.error("Failed to change page", s);
     } finally {
@@ -404,7 +579,7 @@ class f {
     const n = this.showLoading();
     try {
       const a = await this.fetchTextResult(e, t);
-      this.updateAppContent(a);
+      await this.updateAppContent(a);
     } catch (a) {
       console.log("Failed to change page", a);
     } finally {
@@ -425,11 +600,11 @@ class f {
   setDomElementForPages(e) {
     this._appContent = e;
   }
-  updateAppContent(e) {
+  async updateAppContent(e) {
     try {
       this.preventExternalResources(e);
     } catch (t) {
-      showApplicationError(t, t, t), console.error(t);
+      await window.showApplicationError(t, t, t), console.error(t);
       return;
     }
     this._appContent.innerHTML = e;
@@ -461,7 +636,7 @@ class f {
                 break;
               }
               if (a = a.parentElement, a === document) {
-                await showApplicationError("Error executing action", "Action not found in any Presenter", "Action not found in any Presenter");
+                await window.showApplicationError("Error executing action", "Action not found in any Presenter", "Action not found in any Presenter");
                 return;
               }
             }
@@ -469,7 +644,7 @@ class f {
               try {
                 a.webSkelPresenter[s](t, ...l), i = !0;
               } catch (h) {
-                console.error(h), await showApplicationError("Error executing action", "There is no action for the button to execute", `Encountered ${h}`);
+                console.error(h), await window.showApplicationError("Error executing action", "There is no action for the button to execute", `Encountered ${h}`);
                 return;
               }
             else
@@ -521,26 +696,26 @@ class f {
     const o = document.createElement(e), { proxy: s, revoke: l } = this.createReactiveProxy(n, i, o);
     o.setAttribute("data-presenter", e);
     const d = {
-      get(h, u, m) {
+      get(h, u, p) {
         if (u === "element")
           return new WeakRef(o);
         if (u in s)
-          return Reflect.get(s, u, m);
+          return Reflect.get(s, u, p);
         if (u in o) {
-          const p = o[u];
-          return typeof p == "function" ? p.bind(o) : p;
+          const m = o[u];
+          return typeof m == "function" ? m.bind(o) : m;
         }
-        return Reflect.get(h, u, m);
+        return Reflect.get(h, u, p);
       },
-      set(h, u, m, p) {
-        return u === "element" ? !1 : u in s ? Reflect.set(s, u, m, p) : u in o ? (o[u] = m, !0) : Reflect.set(s, u, m, p);
+      set(h, u, p, m) {
+        return u === "element" ? !1 : u in s ? Reflect.set(s, u, p, m) : u in o ? (o[u] = p, !0) : Reflect.set(s, u, p, m);
       },
       has(h, u) {
         return u === "element" || u in s || u in o;
       },
       ownKeys(h) {
-        const u = Reflect.ownKeys(s), m = Reflect.ownKeys(o);
-        return [.../* @__PURE__ */ new Set([...u, ...m, "element"])];
+        const u = Reflect.ownKeys(s), p = Reflect.ownKeys(o);
+        return [.../* @__PURE__ */ new Set([...u, ...p, "element"])];
       },
       getOwnPropertyDescriptor(h, u) {
         return u === "element" ? {
@@ -596,9 +771,9 @@ class f {
           this.invalidateFn && this.invalidateFn();
         }
         async connectedCallback() {
-          this._webSkelProps && (this.props = this._webSkelProps.proxy), this.resources = await f.instance.ResourceManager.loadComponent(e), w(this.resources.html).forEach((i) => {
+          this._webSkelProps && (this.props = this._webSkelProps.proxy), this.resources = await f.instance.ResourceManager.loadComponent(e), $(this.resources.html).forEach((i) => {
             i = i.slice(2), this.variables[i] = "";
-          }), this.templateArray = E(this.resources.html);
+          }), this.templateArray = k(this.resources.html);
           let n = this, a = null;
           for (const i of n.attributes)
             n.variables[i.nodeName] = y(i.nodeValue), i.name === "data-presenter" && (a = i.nodeValue);
@@ -647,101 +822,31 @@ class f {
     );
   };
 }
-async function V(r, e) {
-  const t = g(r, "form"), n = {
-    data: {},
-    elements: {},
-    isValid: !1
-  };
-  typeof t.checkValidity == "function" && (n.isValid = t.checkValidity());
-  const a = [...t.querySelectorAll("[name]:not([type=hidden])")];
-  for (const i of a) {
-    if (i.disabled)
-      continue;
-    if (i.multiple && i.tagName === "SELECT" ? n.data[i.name] = Array.from(i.selectedOptions).map((l) => l.value) : n.data[i.name] = i.tagName === "CHECKBOX" || i.tagName === "INPUT" && i.type === "checkbox" ? i.checked : i.value, i.getAttribute("type") === "file")
-      if (i.multiple)
-        n.data[i.name] = i.files;
-      else
-        try {
-          i.files.length > 0 && (n.data[i.name] = await R(i.files[0]));
-        } catch (l) {
-          console.log(l);
-        }
-    let o = !0;
-    if (i.setCustomValidity(""), typeof i.checkValidity == "function" ? o = i.checkValidity() : typeof i.getInputElement == "function" && (o = (await i.getInputElement()).checkValidity()), o === !0 && e) {
-      let l = i.getAttribute("data-condition");
-      l && (o = e[l].fn(i, n), o ? i.setCustomValidity("") : (i.setCustomValidity(e[l].errorMessage), n.isValid = !1));
-    }
-    n.elements[i.name] = {
-      isValid: o,
-      element: i
-    };
-    let s = document.querySelector(`[data-id = '${i.getAttribute("id")}' ]`);
-    s && (o ? s.classList.remove("input-invalid") : s.classList.add("input-invalid"));
-  }
-  t.checkValidity() || t.reportValidity();
-  for (let i of Object.keys(n.data))
-    n.elements[i] && n.elements[i].element && n.elements[i].element.hasAttribute("data-no-sanitize") || (n.data[i] = y(n.data[i]));
-  return n;
-}
-async function R(r) {
-  let e = "", t = new FileReader();
-  return await new Promise((n, a) => {
-    t.onload = function() {
-      e = t.result, n(e);
-    }, r ? t.readAsDataURL(r) : a("No file given as input at imageUpload");
-  });
-}
-function F() {
-  let r = navigator.userAgent, e, t = r.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
-  return /trident/i.test(t[1]) ? (e = /\brv[ :]+(\d+)/g.exec(r) || [], { name: "IE", version: e[1] || "" }) : t[1] === "Chrome" && (e = r.match(/\bOPR|Edge\/(\d+)/), e != null) ? { name: "Opera", version: e[1] } : (t = t[2] ? [t[1], t[2]] : [navigator.appName, navigator.appVersion, "-?"], (e = r.match(/version\/(\d+)/i)) != null && t.splice(1, 1, e[1]), {
-    name: t[0],
-    version: t[1]
-  });
-}
-function I() {
-  const r = window.location.search, e = new URLSearchParams(r);
-  let t = {};
-  for (let n of e.keys())
-    t[n] = e.get(n);
-  return t;
-}
-function U() {
-  const r = window.location.hash.split("?");
-  let e = {};
-  if (r[1]) {
-    const t = new URLSearchParams(r[1]);
-    for (const [n, a] of t)
-      e[n] = a;
-    return e;
-  }
-  return e;
-}
 export {
-  k as ResourceManager,
+  x as ResourceManager,
   f as WebSkel,
-  j as closeModal,
-  E as createTemplateArray,
-  N as customTrim,
+  I as closeModal,
+  k as createTemplateArray,
+  T as customTrim,
   f as default,
-  V as extractFormInformation,
-  w as findDoubleDollarWords,
-  F as getBrowser,
+  _ as extractFormInformation,
+  $ as findDoubleDollarWords,
+  Q as getBrowser,
   g as getClosestParentElement,
-  P as getClosestParentWithPresenter,
-  U as getHashParams,
-  D as getMainAppContainer,
-  I as getURLParams,
-  R as imageUpload,
-  O as invalidateParentElement,
-  x as moveCursorToEnd,
-  T as normalizeSpaces,
-  A as notBasePage,
-  S as refreshElement,
-  L as removeActionBox,
-  b as reverseQuerySelector,
+  b as getClosestParentWithPresenter,
+  Z as getHashParams,
+  O as getMainAppContainer,
+  X as getURLParams,
+  S as imageUpload,
+  j as invalidateParentElement,
+  L as moveCursorToEnd,
+  M as normalizeSpaces,
+  R as notBasePage,
+  E as refreshElement,
+  C as removeActionBox,
+  w as reverseQuerySelector,
   y as sanitize,
-  H as showActionBox,
-  C as showModal,
-  M as unsanitize
+  U as showActionBox,
+  P as showModal,
+  A as unsanitize
 };
