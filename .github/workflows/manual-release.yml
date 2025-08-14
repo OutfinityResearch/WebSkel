@@ -44,8 +44,8 @@ jobs:
           echo "Checking bundle sizes:"
           du -h dist/*.mjs dist/*.umd.js
           echo ""
-          echo "Checking that index.mjs contains utilities:"
-          grep -c "export" dist/index.mjs || echo "No exports found in index.mjs"
+          echo "Checking that main.mjs contains utilities:"
+          grep -c "export" dist/main.mjs || echo "No exports found in main.mjs"
           echo ""
           echo "Checking that webskel.mjs contains main class:"
           grep -c "export" dist/webskel.mjs || echo "No exports found in webskel.mjs"
@@ -55,8 +55,8 @@ jobs:
           mkdir -p releases
           cp -f dist/webskel.mjs releases/webskel.mjs
           cp -f dist/webskel.umd.js releases/webskel.umd.js
-          cp -f dist/index.mjs releases/index.mjs
-          cp -f dist/index.umd.js releases/index.umd.js
+          cp -f dist/main.mjs releases/main.mjs
+          cp -f dist/main.umd.js releases/main.umd.js
           echo "Bundles copied to releases folder:"
           ls -la releases/
 
@@ -94,8 +94,8 @@ jobs:
             ### Bundle Files
             - `webskel.mjs` - Main WebSkel class (ES Module)
             - `webskel.umd.js` - Main WebSkel class (UMD)
-            - `index.mjs` - All utilities and main class (ES Module)
-            - `index.umd.js` - All utilities and main class (UMD)
+            - `main.mjs` - All utilities and main class (ES Module)
+            - `main.umd.js` - All utilities and main class (UMD)
             
             ### Import Examples
             ```javascript
@@ -120,8 +120,8 @@ jobs:
           files: |
             releases/webskel.mjs
             releases/webskel.umd.js
-            releases/index.mjs
-            releases/index.umd.js
+            releases/main.mjs
+            releases/main.umd.js
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
 

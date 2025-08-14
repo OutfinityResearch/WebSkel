@@ -5,7 +5,7 @@ export default defineConfig({
     lib: {
       entry: {
         webskel: 'webSkel.js',
-        index: 'index.js'
+        main: 'index.js'
       },
       name: 'WebSkel',
       fileName: (format, entryName) => {
