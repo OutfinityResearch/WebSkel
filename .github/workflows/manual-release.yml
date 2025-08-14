@@ -19,7 +19,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout main repository
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.repository.default_branch }}
@@ -47,29 +47,19 @@ jobs:
           echo "Checking that webskel.mjs contains all utilities:"
           grep -c "export" dist/webskel.mjs || echo "No exports found in webskel.mjs"
 
-      - name: Copy bundles to releases folder (overwrite existing)
-        run: |
-          mkdir -p releases
-          cp -f dist/webskel.mjs releases/webskel.mjs
-          cp -f dist/webskel.umd.js releases/webskel.umd.js
-          echo "Bundles copied to releases folder (overwriting existing files):"
-          ls -la releases/
+      - name: Checkout releases repository
+        uses: actions/checkout@v4
+        with:
+          repository: OutfinityResearch/webskel-releases
+          token: ${{ secrets.GIT_TOKEN }}
+          path: webskel-releases
 
-      - name: Show git status
-        run: git status
-
-      - name: Commit bundles into repo
+      - name: Copy bundles to releases repository
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add releases/ dist/
-          if git diff --cached --quiet; then
-            echo "No bundle changes to commit"
-          else
-            echo "Committing bundles into releases/"
-            git commit -m "chore(release): add Vite bundles for ${{ github.event.inputs.version }}"
-            git push origin HEAD:${{ github.event.repository.default_branch }}
-          fi
+          cp -f dist/webskel.mjs webskel-releases/webskel.mjs
+          cp -f dist/webskel.umd.js webskel-releases/webskel.umd.js
+          echo "Bundles copied to releases repository:"
+          ls -la webskel-releases/
 
       - name: Compute tag name
         id: tag
@@ -78,41 +68,57 @@ jobs:
           if [[ "$VERSION" =~ ^v ]]; then TAG="$VERSION"; else TAG="v$VERSION"; fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.tag.outputs.tag }}
-          name: ${{ github.event.inputs.version }}
-          body: |
-            ## WebSkel ${{ github.event.inputs.version }}
-            
-            ### Bundle Files
-            - `webskel.mjs` - All utilities and main class (ES Module)
-            - `webskel.umd.js` - All utilities and main class (UMD)
-            
-            ### Import Examples
-            ```javascript
-            // Import everything
-            import { sanitize, getBrowser, WebSkel } from 'webskel';
-            
-            // Import main class only
-            import { WebSkel } from 'webskel/webskel';
-            
-            // Import specific utilities
-            import { sanitize } from 'webskel/dom-utils';
-            import { showModal } from 'webskel/modal-utils';
-            ```
-            
-            ### Features
-            - ✅ Tree-shaking friendly imports
-            - ✅ Individual utility exports
-            - ✅ ES Module and UMD support
-            - ✅ Optimized bundle sizes
-          draft: false
-          prerelease: ${{ github.event.inputs.prerelease }}
-          files: |
-            releases/webskel.mjs
-            releases/webskel.umd.js
+      - name: Commit, tag, and push to releases repository
+        working-directory: webskel-releases
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add webskel.mjs webskel.umd.js
+          if git diff --cached --quiet; then
+            echo "No bundle changes to commit"
+          else
+            echo "Committing bundles for version ${{ github.event.inputs.version }}"
+            git commit -m "chore(release): add Vite bundles for ${{ github.event.inputs.version }}"
+            git tag -a "${{ steps.tag.outputs.tag }}" -m "Release ${{ github.event.inputs.version }}"
+            git push
+            git push origin "${{ steps.tag.outputs.tag }}"
+          fi
+
+      - name: Create GitHub Release in releases repository
+        working-directory: webskel-releases
+        run: |
+          gh release create "${{ steps.tag.outputs.tag }}" \
+            --repo OutfinityResearch/webskel-releases \
+            --title "${{ github.event.inputs.version }}" \
+            --notes "$(cat <<'EOF'
+          ## WebSkel ${{ github.event.inputs.version }}
+          
+          ### Bundle Files
+          - `webskel.mjs` - All utilities and main class (ES Module)
+          - `webskel.umd.js` - All utilities and main class (UMD)
+          
+          ### Import Examples
+          \`\`\`javascript
+          // Import everything
+          import { sanitize, getBrowser, WebSkel } from 'webskel';
+          
+          // Import main class only
+          import { WebSkel } from 'webskel/webskel';
+          
+          // Import specific utilities
+          import { sanitize } from 'webskel/dom-utils';
+          import { showModal } from 'webskel/modal-utils';
+          \`\`\`
+          
+          ### Features
+          - ✅ Tree-shaking friendly imports
+          - ✅ Individual utility exports
+          - ✅ ES Module and UMD support
+          - ✅ Optimized bundle sizes
+          EOF
+          )" \
+            ${{ github.event.inputs.prerelease == 'true' && '--prerelease' || '' }} \
+            webskel.mjs webskel.umd.js
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
 
