@@ -118,7 +118,7 @@ class WebSkel {
         try {
             this.validateTagName(pageHtmlTagName);
         } catch (e) {
-            await window.showApplicationError(e, e, e);
+            await window.showApplicationError(`Failed to navigate to ${pageHtmlTagName} with Url ${url}`, e.message, e.stack.toString());
             console.error(e);
             return;
         }
@@ -185,7 +185,7 @@ class WebSkel {
         try {
             this.preventExternalResources(content);
         } catch (e) {
-            await window.showApplicationError(e, e, e);
+            await window.showApplicationError("UpdateAppContent", e.message, e.stack.toString());
             console.error(e);
             return;
         }
