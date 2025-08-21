@@ -4,26 +4,26 @@ class L {
   }
   async loadStyleSheets(e, t) {
     const n = [];
-    return n.push(...e.map((s) => this.loadStyleSheet({
-      cssText: s,
+    return n.push(...e.map((o) => this.loadStyleSheet({
+      cssText: o,
       identifier: t
     }))), (await Promise.all(n)).join("");
   }
   async loadStyleSheet({ url: e = null, cssText: t = null, identifier: n = null }) {
     if (!e && !t)
       return;
-    const s = n || e;
-    let i = this.loadedStyleSheets.get(s) || 0;
+    const o = n || e;
+    let i = this.loadedStyleSheets.get(o) || 0;
     if (i === 0)
-      return new Promise((o, a) => {
+      return new Promise((s, a) => {
         try {
           const l = document.createElement("style");
-          l.textContent = t, n && (l.className = n), document.head.appendChild(l), this.loadedStyleSheets.set(s, i + 1), o(l.outerHTML);
+          l.textContent = t, n && (l.className = n), document.head.appendChild(l), this.loadedStyleSheets.set(o, i + 1), s(l.outerHTML);
         } catch (l) {
           a(new Error(`Failed to inject the CSS text: ${l.message}`));
         }
       });
-    this.loadedStyleSheets.set(s, i + 1);
+    this.loadedStyleSheets.set(o, i + 1);
   }
   async unloadStyleSheets(e) {
     let t = this.loadedStyleSheets.get(e);
@@ -50,24 +50,25 @@ class L {
       loadingPromise: null,
       isPromiseFulfilled: !1
     }, this.components[e.name].loadingPromise = (async () => {
-      function t(n, s) {
-        let i = h.instance.configs.rootDir;
-        return i ? n.directory ? i = `${i}/${n.directory}/${n.type}/${n.name}/${n.name}.${s}` : i = `${i}/${n.type}/${n.name}/${n.name}.${s}` : n.directory ? i = `./${h.instance.configs.webComponentsRootDir}/${n.directory}/${n.type}/${n.name}/${n.name}.${s}` : i = `./${h.instance.configs.webComponentsRootDir}/${n.type}/${n.name}/${n.name}.${s}`, i;
+      function t(n, o) {
+        const { rootDir: i, webComponentsRootDir: s } = h.instance.configs;
+        let a = i || s || "";
+        return n.directory && (a = `${a}/${n.directory}`), a || (a = s ? `./${s}${n.directory ? `/${n.directory}` : ""}` : `${n.directory ? `/${n.directory}` : ""}`), `${a}/${n.type}/${n.name}/${n.name}.${o}`;
       }
       try {
-        let n, s;
-        n = t(e, "html"), s = t(e, "css");
+        let n, o;
+        n = t(e, "html"), o = t(e, "css");
         const i = e.loadedTemplate || await (await fetch(n)).text();
         this.components[e.name].html = i;
-        const o = e.loadedCSSs || [await (await fetch(s)).text()];
-        if (this.components[e.name].css = o, await this.loadStyleSheets(o, e.name), e.presenterClassName)
+        const s = e.loadedCSSs || [await (await fetch(o)).text()];
+        if (this.components[e.name].css = s, await this.loadStyleSheets(s, e.name), e.presenterClassName)
           if (e.presenterModule)
             this.registerPresenter(e.name, e.presenterModule[e.presenterClassName]);
           else {
             const l = await import(t(e, "js"));
             this.registerPresenter(e.name, l[e.presenterClassName]);
           }
-        return this.components[e.name].isPromiseFulfilled = !0, { html: i, css: o };
+        return this.components[e.name].isPromiseFulfilled = !0, { html: i, css: s };
       } catch (n) {
         throw n;
       }
@@ -76,18 +77,18 @@ class L {
   registerPresenter(e, t) {
     this.components[e].presenter = t;
   }
-  initialisePresenter(e, t, n, s = {}) {
+  initialisePresenter(e, t, n, o = {}) {
     let i;
     try {
-      i = new this.components[t.componentName].presenter(t, n, s), t.isPresenterReady = !0, t.onPresenterReady();
-    } catch (o) {
-      showApplicationError("Error creating a presenter instance", `Encountered an error during the initialization of ${e} for component: ${t.componentName}`, o + ":" + o.stack.split(`
+      i = new this.components[t.componentName].presenter(t, n, o), t.isPresenterReady = !0, t.onPresenterReady();
+    } catch (s) {
+      showApplicationError("Error creating a presenter instance", `Encountered an error during the initialization of ${e} for component: ${t.componentName}`, s + ":" + s.stack.split(`
 `)[1]);
     }
     return i;
   }
 }
-function x(r) {
+function R(r) {
   if (!r) {
     console.error("moveCursorToEnd: No element provided");
     return;
@@ -115,29 +116,29 @@ function g(r, e, t) {
   return n;
 }
 function w(r, e, t = "", n = !1) {
-  const s = /* @__PURE__ */ new Set();
+  const o = /* @__PURE__ */ new Set();
   if (!(r instanceof Element))
     throw new TypeError("The first argument must be a DOM Element.");
   if (typeof e != "string" || e.trim() === "")
     throw new TypeError("The second argument must be a non-empty string.");
   if (r.matches(e) && !n)
     return r;
-  s.add(r);
+  o.add(r);
   let i = r;
   for (; i; ) {
-    const o = i.parentElement;
-    if (o) {
-      let a = o.firstElementChild;
+    const s = i.parentElement;
+    if (s) {
+      let a = s.firstElementChild;
       for (; a; ) {
-        if (!s.has(a)) {
-          if (s.add(a), a !== i && a.matches(e))
+        if (!o.has(a)) {
+          if (o.add(a), a !== i && a.matches(e))
             return a;
           if (a.children.length > 0) {
             const l = [a.firstElementChild];
             for (; l.length > 0; ) {
               const d = l.shift();
-              if (!s.has(d)) {
-                if (s.add(d), d.matches(e))
+              if (!o.has(d)) {
+                if (o.add(d), d.matches(e))
                   return d;
                 let c = d.nextElementSibling;
                 for (; c; )
@@ -150,8 +151,8 @@ function w(r, e, t = "", n = !1) {
         a = a.nextElementSibling;
       }
     }
-    if (i = o, i && !s.has(i)) {
-      if (s.add(i), i.matches(e))
+    if (i = s, i && !o.has(i)) {
+      if (o.add(i), i.matches(e))
         return i;
       if (t && i.matches(t))
         break;
@@ -159,11 +160,11 @@ function w(r, e, t = "", n = !1) {
   }
   return null;
 }
-function R(r) {
+function A(r) {
   const e = (r.match(/\//g) || []).length;
   return !(e > 1 || e === 1 && r.charAt(r.length - 1) !== "/");
 }
-function A(r) {
+function $(r) {
   return r != null && typeof r == "string" ? r.replace(/&nbsp;/g, " ").replace(/&#13;/g, `
 `).replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">") : "";
 }
@@ -208,13 +209,13 @@ const N = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   getClosestParentWithPresenter: b,
   getMainAppContainer: O,
   invalidateParentElement: j,
-  moveCursorToEnd: x,
+  moveCursorToEnd: R,
   normalizeSpaces: M,
-  notBasePage: R,
+  notBasePage: A,
   refreshElement: E,
   reverseQuerySelector: w,
   sanitize: y,
-  unsanitize: A
+  unsanitize: $
 }, Symbol.toStringTag, { value: "Module" }));
 async function _(r, e) {
   const t = g(r, "form"), n = {
@@ -223,8 +224,8 @@ async function _(r, e) {
     isValid: !1
   };
   typeof t.checkValidity == "function" && (n.isValid = t.checkValidity());
-  const s = [...t.querySelectorAll("[name]:not([type=hidden])")];
-  for (const i of s) {
+  const o = [...t.querySelectorAll("[name]:not([type=hidden])")];
+  for (const i of o) {
     if (i.disabled)
       continue;
     if (i.multiple && i.tagName === "SELECT" ? n.data[i.name] = Array.from(i.selectedOptions).map((l) => l.value) : n.data[i.name] = i.tagName === "CHECKBOX" || i.tagName === "INPUT" && i.type === "checkbox" ? i.checked : i.value, i.getAttribute("type") === "file")
@@ -236,17 +237,17 @@ async function _(r, e) {
         } catch (l) {
           console.log(l);
         }
-    let o = !0;
-    if (i.setCustomValidity(""), typeof i.checkValidity == "function" ? o = i.checkValidity() : typeof i.getInputElement == "function" && (o = (await i.getInputElement()).checkValidity()), o === !0 && e) {
+    let s = !0;
+    if (i.setCustomValidity(""), typeof i.checkValidity == "function" ? s = i.checkValidity() : typeof i.getInputElement == "function" && (s = (await i.getInputElement()).checkValidity()), s === !0 && e) {
       let l = i.getAttribute("data-condition");
-      l && (o = e[l].fn(i, n), o ? i.setCustomValidity("") : (i.setCustomValidity(e[l].errorMessage), n.isValid = !1));
+      l && (s = e[l].fn(i, n), s ? i.setCustomValidity("") : (i.setCustomValidity(e[l].errorMessage), n.isValid = !1));
     }
     n.elements[i.name] = {
-      isValid: o,
+      isValid: s,
       element: i
     };
     let a = document.querySelector(`[data-id = '${i.getAttribute("id")}' ]`);
-    a && (o ? a.classList.remove("input-invalid") : a.classList.add("input-invalid"));
+    a && (s ? a.classList.remove("input-invalid") : a.classList.add("input-invalid"));
   }
   t.checkValidity() || t.reportValidity();
   for (let i of Object.keys(n.data))
@@ -255,18 +256,18 @@ async function _(r, e) {
 }
 async function P(r) {
   let e = "", t = new FileReader();
-  return await new Promise((n, s) => {
+  return await new Promise((n, o) => {
     t.onload = function() {
       e = t.result, n(e);
-    }, r ? t.readAsDataURL(r) : s("No file given as input at imageUpload");
+    }, r ? t.readAsDataURL(r) : o("No file given as input at imageUpload");
   });
 }
 async function H(r) {
   let e = "", t = new FileReader();
-  return await new Promise((n, s) => {
+  return await new Promise((n, o) => {
     t.onload = function() {
       e = t.result, n(e);
-    }, r ? t.readAsText(r) : s("No file given as input");
+    }, r ? t.readAsText(r) : o("No file given as input");
   });
 }
 const V = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
@@ -277,29 +278,29 @@ const V = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
 }, Symbol.toStringTag, { value: "Module" }));
 async function S(r, e, t) {
   typeof e == "boolean" && (t = e, e = void 0);
-  const n = document.querySelector("body"), s = g(n, "dialog");
-  s && (s.close(), s.remove());
-  const i = Object.assign(D(r, e), {
+  const n = document.querySelector("body"), o = g(n, "dialog");
+  o && (o.close(), o.remove());
+  const i = Object.assign(I(r, e), {
     component: r,
     cssClass: r,
     componentProps: e
   });
-  return n.appendChild(i), await i.showModal(), i.addEventListener("keydown", v), t ? new Promise((o) => {
+  return n.appendChild(i), await i.showModal(), i.addEventListener("keydown", v), t ? new Promise((s) => {
     i.addEventListener("close", (a) => {
-      o(a.data);
+      s(a.data);
     });
   }) : i;
 }
 function v(r) {
   r.key === "Escape" && r.preventDefault();
 }
-function D(r, e) {
+function I(r, e) {
   let t = document.createElement("dialog"), n = "";
   return e !== void 0 && Object.keys(e).forEach((i) => {
     n += ` data-${i}="${e[i]}"`;
   }), h.instance.configs.components.find((i) => i.name === r).presenterClassName && (n += ` data-presenter="${r}"`), n === "" ? t.innerHTML = `<${r}/>` : t.innerHTML = `<${r}${n}/>`, t.classList.add("modal", `${r}-dialog`), t;
 }
-function I(r, e) {
+function U(r, e) {
   const t = g(r, "dialog");
   if (e !== void 0) {
     let n = new Event("close", {
@@ -313,59 +314,59 @@ function I(r, e) {
 function C(r, e) {
   document.removeEventListener("click", r.clickHandler), r.remove(), e !== void 0 && delete e.actionBox;
 }
-async function U(r, e, t, n, s = {}) {
+async function D(r, e, t, n, o = {}) {
   if (r.parentNode.querySelector(t))
     return null;
-  const o = document.createElement(`${t}`);
-  for (const [d, c] of Object.entries(s))
-    o.setAttribute(`data-${d}`, c);
+  const s = document.createElement(`${t}`);
+  for (const [d, c] of Object.entries(o))
+    s.setAttribute(`data-${d}`, c);
   let a;
   switch (n) {
     case "prepend":
-      r.parentNode.insertBefore(o, r);
+      r.parentNode.insertBefore(s, r);
       break;
     case "append":
-      r.parentNode.appendChild(o);
+      r.parentNode.appendChild(s);
       break;
     case "replace":
       a = r;
       const d = a.parentNode;
-      d.removeChild(a), d.appendChild(o);
+      d.removeChild(a), d.appendChild(s);
       break;
     case "replace-all":
       a = r.parentNode;
       const c = a;
-      a = c.innerHTML, c.innerHTML = "", c.appendChild(o);
+      a = c.innerHTML, c.innerHTML = "", c.appendChild(s);
       break;
     default:
       console.error(`Invalid Insertion Mode: ${n}. No changes to the DOM have been made`);
       return;
   }
   let l = (d) => {
-    if (o && !o.contains(d.target)) {
+    if (s && !s.contains(d.target)) {
       if (n === "replace" && a) {
-        const c = o.parentNode;
-        c.removeChild(o), c.appendChild(a);
+        const c = s.parentNode;
+        c.removeChild(s), c.appendChild(a);
       } else if (n === "replace-all" && a) {
-        const c = o.parentNode;
+        const c = s.parentNode;
         c.innerHTML = a;
       }
-      C(o);
+      C(s);
     }
   };
-  return o.clickHandler = l, document.addEventListener("click", l), o;
+  return s.clickHandler = l, document.addEventListener("click", l), s;
 }
 async function F(r, e, t = !1) {
   typeof e == "boolean" && (t = e, e = void 0);
-  const n = document.querySelector("body"), s = g(n, "dialog");
-  s && (s.close(), s.remove());
+  const n = document.querySelector("body"), o = g(n, "dialog");
+  o && (o.close(), o.remove());
   let i = document.createElement("dialog");
   i.classList.add("modal", `${r}-dialog`);
-  const o = window.WebSkel || assistOS.UI;
-  if (!o)
+  const s = window.WebSkel || assistOS.UI;
+  if (!s)
     throw new Error("WebSkel instance not found for reactive modal");
-  let a = o.configs.components.find((c) => c.name === r);
-  const l = o.createElement(
+  let a = s.configs.components.find((c) => c.name === r);
+  const l = s.createElement(
     r,
     i,
     e || {},
@@ -391,34 +392,34 @@ async function F(r, e, t = !1) {
 }
 const B = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  closeModal: I,
+  closeModal: U,
   createReactiveModal: F,
   removeActionBox: C,
-  showActionBox: U,
+  showActionBox: D,
   showModal: S
 }, Symbol.toStringTag, { value: "Module" }));
-function $(r) {
+function k(r) {
   let e = /\$\$[\w\-_]+/g;
   return r.match(e) || [];
 }
-function k(r) {
+function x(r) {
   let e = 0;
   const t = 0, n = 1;
-  function s(l) {
+  function o(l) {
     return !/^[a-zA-Z0-9_\-$]$/.test(l);
   }
   function i(l) {
     return r[l] !== "$" || r[l + 1] !== "$" ? t : n;
   }
-  let o = [], a = 0;
+  let s = [], a = 0;
   for (; a < r.length; ) {
     for (; !i(a) && a < r.length; )
       a++;
-    for (o.push(r.slice(e, a)), e = a; !s(r[a]) && a < r.length; )
+    for (s.push(r.slice(e, a)), e = a; !o(r[a]) && a < r.length; )
       a++;
-    o.push(r.slice(e, a)), e = a;
+    s.push(r.slice(e, a)), e = a;
   }
-  return o;
+  return s;
 }
 function q(r, e) {
   if (typeof r != "string" || r.trim() === "")
@@ -445,10 +446,10 @@ function z(r) {
 }
 const K = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  createTemplateArray: k,
+  createTemplateArray: x,
   decodeBase64: z,
   encodeToBase64: q,
-  findDoubleDollarWords: $
+  findDoubleDollarWords: k
 }, Symbol.toStringTag, { value: "Module" }));
 function Q() {
   let r = navigator.userAgent, e, t = r.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
@@ -469,8 +470,8 @@ function Z() {
   let e = {};
   if (r[1]) {
     const t = new URLSearchParams(r[1]);
-    for (const [n, s] of t)
-      e[n] = s;
+    for (const [n, o] of t)
+      e[n] = o;
     return e;
   }
   return e;
@@ -500,17 +501,17 @@ class h {
       K,
       G
     ];
-    for (const s of n)
-      for (const [i, o] of Object.entries(s))
-        t[i] = o;
+    for (const o of n)
+      for (const [i, s] of Object.entries(o))
+        t[i] = s;
     return await t.loadConfigs(e), h.instance = t, h.instance;
   }
   async loadConfigs(e) {
     try {
       const n = await (await fetch(e)).json();
       this.configs = n;
-      for (const s of n.components)
-        await this.defineComponent(s);
+      for (const o of n.components)
+        await this.defineComponent(o);
     } catch (t) {
       console.error(t), await window.showApplicationError("Error loading configs", "Error loading configs", `Encountered ${t} while trying loading webSkel configs`);
     }
@@ -538,7 +539,7 @@ class h {
   resetLoading() {
     this.defaultLoader = document.createElement("dialog"), this.defaultLoader.classList.add("spinner"), this.defaultLoader.classList.add("spinner-default-style");
   }
-  async changeToDynamicPage(e, t, n, s) {
+  async changeToDynamicPage(e, t, n, o) {
     try {
       this.validateTagName(e);
     } catch (a) {
@@ -546,11 +547,11 @@ class h {
       return;
     }
     const i = this.showLoading();
-    let o = "";
-    n && (o = Object.entries(n).map(([a, l]) => `data-${a}="${l}"`).join(" "));
+    let s = "";
+    n && (s = Object.entries(n).map(([a, l]) => `data-${a}="${l}"`).join(" "));
     try {
-      const a = `<${e} data-presenter="${e}" ${o}></${e}>`;
-      if (!s) {
+      const a = `<${e} data-presenter="${e}" ${s}></${e}>`;
+      if (!o) {
         const l = ["#", t].join("");
         window.history.pushState({ pageHtmlTagName: e, relativeUrlContent: a }, l.toString(), l);
       }
@@ -564,16 +565,16 @@ class h {
   validateTagName(e) {
     if (!/^(?![0-9])[a-z0-9]+(?:-*[a-z0-9]+)*-*?$/.test(e))
       throw new Error(`Invalid tag name: ${e}`);
-    if (!this.configs.components.find((s) => s.name === e))
+    if (!this.configs.components.find((o) => o.name === e))
       throw new Error(`Element not found in configs: ${e}`);
   }
   async changeToStaticPage(e, t) {
     const n = this.showLoading();
     try {
-      const s = await this.fetchTextResult(e, t);
-      await this.updateAppContent(s);
-    } catch (s) {
-      console.log("Failed to change page", s);
+      const o = await this.fetchTextResult(e, t);
+      await this.updateAppContent(o);
+    } catch (o) {
+      console.log("Failed to change page", o);
     } finally {
       this.hideLoading(n);
     }
@@ -604,9 +605,9 @@ class h {
   preventExternalResources(e) {
     let t = /(src|href|action|onclick)\s*=\s*"[^"]*"/g, n = e.match(t);
     if (n)
-      for (let s of n) {
-        let i = s.split('"')[1], o = new URL(i).host;
-        if (window.location.host !== o)
+      for (let o of n) {
+        let i = o.split('"')[1], s = new URL(i).host;
+        if (window.location.host !== s)
           throw new Error(`External resource detected: ${i}`);
       }
   }
@@ -618,34 +619,34 @@ class h {
       for (; t && t !== this._documentElement && !n; ) {
         if (t.hasAttribute("data-local-action")) {
           e.preventDefault(), e.stopPropagation(), n = !0;
-          let s = t, i = !1;
-          const o = t.getAttribute("data-local-action"), [a, ...l] = o.split(" ");
+          let o = t, i = !1;
+          const s = t.getAttribute("data-local-action"), [a, ...l] = s.split(" ");
           for (; i === !1; ) {
             let d = !1, c;
             for (; d === !1; ) {
-              if (s.webSkelPresenter) {
-                d = !0, c = s.webSkelPresenter;
+              if (o.webSkelPresenter) {
+                d = !0, c = o.webSkelPresenter;
                 break;
               }
-              if (s = s.parentElement, s === document) {
+              if (o = o.parentElement, o === document) {
                 await window.showApplicationError("Error executing action", "Action not found in any Presenter", "Action not found in any Presenter");
                 return;
               }
             }
             if (c[a] !== void 0)
               try {
-                s.webSkelPresenter[a](t, ...l), i = !0;
+                o.webSkelPresenter[a](t, ...l), i = !0;
               } catch (f) {
                 console.error(f), await window.showApplicationError("Error executing action", "There is no action for the button to execute", `Encountered ${f}`);
                 return;
               }
             else
-              d = !1, s = s.parentElement;
+              d = !1, o = o.parentElement;
           }
         } else if (t.hasAttribute("data-action")) {
           e.preventDefault(), e.stopPropagation(), n = !0;
-          const s = t.getAttribute("data-action"), [i, ...o] = s.split(" ");
-          i ? this.callAction(i, t, ...o) : console.error(`${t} : data action attribute value should not be empty!`);
+          const o = t.getAttribute("data-action"), [i, ...s] = o.split(" ");
+          i ? this.callAction(i, t, ...s) : console.error(`${t} : data action attribute value should not be empty!`);
           break;
         }
         t = t.parentElement;
@@ -659,19 +660,19 @@ class h {
     const n = this.actionRegistry[e];
     if (!n)
       throw new Error(`No action handler registered for "${e}"`);
-    let s = t && t[0] instanceof HTMLElement ? t[0] : null;
-    n.call(s, ...t);
+    let o = t && t[0] instanceof HTMLElement ? t[0] : null;
+    n.call(o, ...t);
   }
   async fetchTextResult(e, t) {
     const n = new URL(`${window.location.protocol}//${window.location.host}`);
     e.startsWith("#") && (e = e.slice(1)), console.log("Fetching Data from URL: ", n + e);
-    const s = await fetch(n + e);
-    if (!s.ok)
+    const o = await fetch(n + e);
+    if (!o.ok)
       throw new Error("Failed to execute request");
-    const i = await s.text();
+    const i = await o.text();
     if (!t) {
-      const o = n + "#" + e;
-      window.history.pushState({ relativeUrlPath: e, relativeUrlContent: i }, o.toString(), o);
+      const s = n + "#" + e;
+      window.history.pushState({ relativeUrlPath: e, relativeUrlContent: i }, s.toString(), s);
     }
     return i;
   }
@@ -684,48 +685,48 @@ class h {
    * @param {boolean} [observeProps=false] - If true, nested objects in props will be observed.
    * @returns {Proxy} A reactive proxy for the element's properties.
    */
-  createElement(e, t = null, n = {}, s = {}, i = !1) {
-    const o = document.createElement(e), { proxy: a, revoke: l } = this.createReactiveProxy(n, i, o);
-    o.setAttribute("data-presenter", e);
+  createElement(e, t = null, n = {}, o = {}, i = !1) {
+    const s = document.createElement(e), { proxy: a, revoke: l } = this.createReactiveProxy(n, i, s);
+    s.setAttribute("data-presenter", e);
     const d = {
       get(f, u, p) {
         if (u === "element")
-          return new WeakRef(o);
+          return new WeakRef(s);
         if (u in a)
           return Reflect.get(a, u, p);
-        if (u in o) {
-          const m = o[u];
-          return typeof m == "function" ? m.bind(o) : m;
+        if (u in s) {
+          const m = s[u];
+          return typeof m == "function" ? m.bind(s) : m;
         }
         return Reflect.get(f, u, p);
       },
       set(f, u, p, m) {
-        return u === "element" ? !1 : u in a ? Reflect.set(a, u, p, m) : u in o ? (o[u] = p, !0) : Reflect.set(a, u, p, m);
+        return u === "element" ? !1 : u in a ? Reflect.set(a, u, p, m) : u in s ? (s[u] = p, !0) : Reflect.set(a, u, p, m);
       },
       has(f, u) {
-        return u === "element" || u in a || u in o;
+        return u === "element" || u in a || u in s;
       },
       ownKeys(f) {
-        const u = Reflect.ownKeys(a), p = Reflect.ownKeys(o);
+        const u = Reflect.ownKeys(a), p = Reflect.ownKeys(s);
         return [.../* @__PURE__ */ new Set([...u, ...p, "element"])];
       },
       getOwnPropertyDescriptor(f, u) {
         return u === "element" ? {
-          value: new WeakRef(o),
+          value: new WeakRef(s),
           writable: !1,
           enumerable: !0,
           configurable: !1
-        } : u in a ? Reflect.getOwnPropertyDescriptor(a, u) : u in o ? Reflect.getOwnPropertyDescriptor(o, u) : Reflect.getOwnPropertyDescriptor(f, u);
+        } : u in a ? Reflect.getOwnPropertyDescriptor(a, u) : u in s ? Reflect.getOwnPropertyDescriptor(s, u) : Reflect.getOwnPropertyDescriptor(f, u);
       }
     }, c = new Proxy({}, d);
-    return o._webSkelProps = {
+    return s._webSkelProps = {
       raw: n,
       proxy: a,
       revoke: l,
       observeProps: i
-    }, Object.entries(s).forEach(([f, u]) => {
-      o.setAttribute(f, u);
-    }), t instanceof HTMLElement ? t?.appendChild(o) : typeof t == "string" && document.querySelector(t)?.appendChild(o), c;
+    }, Object.entries(o).forEach(([f, u]) => {
+      s.setAttribute(f, u);
+    }), t instanceof HTMLElement ? t?.appendChild(s) : typeof t == "string" && document.querySelector(t)?.appendChild(s), c;
   }
   /**
    * Creates a reactive proxy for an object that triggers an element invalidation on property changes.
@@ -735,7 +736,7 @@ class h {
    * @returns {{proxy: Proxy, revoke: Function}} An object containing the reactive proxy and a revoke function.
    */
   createReactiveProxy(e, t, n) {
-    const s = {
+    const o = {
       set(a, l, d) {
         t && typeof d == "object" && d !== null && (d = this.createReactiveProxy(d, t, n).proxy);
         const c = a[l];
@@ -744,11 +745,11 @@ class h {
       deleteProperty(a, l) {
         return delete a[l], n.invalidateProxy?.(), !0;
       }
-    }, { proxy: i, revoke: o } = Proxy.revocable(e, s);
+    }, { proxy: i, revoke: s } = Proxy.revocable(e, o);
     if (t)
       for (const a in e)
         typeof e[a] == "object" && e[a] !== null && (e[a] = this.createReactiveProxy(e[a], t, n).proxy);
-    return { proxy: i, revoke: o };
+    return { proxy: i, revoke: s };
   }
   defineComponent = async (e) => {
     customElements.get(e.name) || customElements.define(
@@ -763,13 +764,13 @@ class h {
           this.invalidateFn && this.invalidateFn();
         }
         async connectedCallback() {
-          this._webSkelProps && (this.props = this._webSkelProps.proxy), this.resources = await h.instance.ResourceManager.loadComponent(e), $(this.resources.html).forEach((i) => {
+          this._webSkelProps && (this.props = this._webSkelProps.proxy), this.resources = await h.instance.ResourceManager.loadComponent(e), k(this.resources.html).forEach((i) => {
             i = i.slice(2), this.variables[i] = "";
-          }), this.templateArray = k(this.resources.html);
-          let n = this, s = null;
+          }), this.templateArray = x(this.resources.html);
+          let n = this, o = null;
           for (const i of n.attributes)
-            n.variables[i.nodeName] = y(i.nodeValue), i.name === "data-presenter" && (s = i.nodeValue);
-          if (s) {
+            n.variables[i.nodeName] = y(i.nodeValue), i.name === "data-presenter" && (o = i.nodeValue);
+          if (o) {
             const i = async (a) => {
               const l = (c) => {
                 n.innerHTML = `Error rendering component: ${n.componentName}
@@ -792,12 +793,12 @@ class h {
                   return l(c);
                 }
               await d(), h.instance.hideLoading();
-            }, o = new Proxy(i, {
+            }, s = new Proxy(i, {
               apply: async function(a, l, d) {
                 return n.isPresenterReady || await n.presenterReadyPromise, Reflect.apply(a, l, d);
               }
             });
-            n.invalidateFn = o, n.webSkelPresenter = h.instance.ResourceManager.initialisePresenter(s, n, o, this.props);
+            n.invalidateFn = s, n.webSkelPresenter = h.instance.ResourceManager.initialisePresenter(o, n, s, this.props);
           } else
             n.refresh();
         }
@@ -817,12 +818,12 @@ class h {
 export {
   L as ResourceManager,
   h as WebSkel,
-  I as closeModal,
-  k as createTemplateArray,
+  U as closeModal,
+  x as createTemplateArray,
   T as customTrim,
   h as default,
   _ as extractFormInformation,
-  $ as findDoubleDollarWords,
+  k as findDoubleDollarWords,
   Q as getBrowser,
   g as getClosestParentElement,
   b as getClosestParentWithPresenter,
@@ -831,14 +832,14 @@ export {
   X as getURLParams,
   P as imageUpload,
   j as invalidateParentElement,
-  x as moveCursorToEnd,
+  R as moveCursorToEnd,
   M as normalizeSpaces,
-  R as notBasePage,
+  A as notBasePage,
   E as refreshElement,
   C as removeActionBox,
   w as reverseQuerySelector,
   y as sanitize,
-  U as showActionBox,
+  D as showActionBox,
   S as showModal,
-  A as unsanitize
+  $ as unsanitize
 };
