@@ -490,6 +490,9 @@ class h {
       technical: n
     }), console.log("creating new app manager instance");
   }
+  async reinit(e) {
+    await h.instance.loadConfigs(e);
+  }
   static async initialise(e) {
     if (h.instance)
       return h.instance;
