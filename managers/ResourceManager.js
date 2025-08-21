@@ -73,21 +73,25 @@ export class ResourceManager {
 
             return this.components[component.name].loadingPromise = (async () => {
                 function getFullPath(component, extension){
-                    let basePath = WebSkel.instance.configs.rootDir;
-                    if(!basePath ){
-                        if(component.directory){
-                            basePath = `./${WebSkel.instance.configs.webComponentsRootDir}/${component.directory}/${component.type}/${component.name}/${component.name}.${extension}`;
-                        } else {
-                            basePath = `./${WebSkel.instance.configs.webComponentsRootDir}/${component.type}/${component.name}/${component.name}.${extension}`;
-                        }
-                    } else {
-                    if(component.directory){
-                            basePath = `${basePath}/${component.directory}/${component.type}/${component.name}/${component.name}.${extension}`;
-                        } else {
-                            basePath = `${basePath}/${component.type}/${component.name}/${component.name}.${extension}`;
-                        }
+                    const { rootDir, webComponentsRootDir } = WebSkel.instance.configs;
+
+                    // pick root (prefer rootDir, then webComponentsRootDir, else empty string)
+                    let basePath = rootDir || webComponentsRootDir || '';
+
+                    // add optional directory
+                    if (component.directory) {
+                        basePath = `${basePath}/${component.directory}`;
                     }
-                    return basePath;
+
+                    // if still empty, fall back depending on configs
+                    if (!basePath) {
+                        basePath = webComponentsRootDir
+                            ? `./${webComponentsRootDir}${component.directory ? `/${component.directory}` : ''}`
+                            : `${component.directory ? `/${component.directory}` : ''}`;
+                    }
+
+                    // final assembly
+                    return `${basePath}/${component.type}/${component.name}/${component.name}.${extension}`;
                 }
 
                 try {
