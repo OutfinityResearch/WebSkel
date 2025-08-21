@@ -88,7 +88,7 @@ class L {
     return i;
   }
 }
-function R(r) {
+function $(r) {
   if (!r) {
     console.error("moveCursorToEnd: No element provided");
     return;
@@ -164,7 +164,7 @@ function A(r) {
   const e = (r.match(/\//g) || []).length;
   return !(e > 1 || e === 1 && r.charAt(r.length - 1) !== "/");
 }
-function $(r) {
+function R(r) {
   return r != null && typeof r == "string" ? r.replace(/&nbsp;/g, " ").replace(/&#13;/g, `
 `).replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">") : "";
 }
@@ -209,13 +209,13 @@ const N = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   getClosestParentWithPresenter: b,
   getMainAppContainer: O,
   invalidateParentElement: j,
-  moveCursorToEnd: R,
+  moveCursorToEnd: $,
   normalizeSpaces: M,
   notBasePage: A,
   refreshElement: E,
   reverseQuerySelector: w,
   sanitize: y,
-  unsanitize: $
+  unsanitize: R
 }, Symbol.toStringTag, { value: "Module" }));
 async function _(r, e) {
   const t = g(r, "form"), n = {
@@ -262,7 +262,7 @@ async function P(r) {
     }, r ? t.readAsDataURL(r) : o("No file given as input at imageUpload");
   });
 }
-async function H(r) {
+async function U(r) {
   let e = "", t = new FileReader();
   return await new Promise((n, o) => {
     t.onload = function() {
@@ -274,13 +274,13 @@ const V = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   extractFormInformation: _,
   imageUpload: P,
-  uploadFileAsText: H
+  uploadFileAsText: U
 }, Symbol.toStringTag, { value: "Module" }));
 async function S(r, e, t) {
   typeof e == "boolean" && (t = e, e = void 0);
   const n = document.querySelector("body"), o = g(n, "dialog");
   o && (o.close(), o.remove());
-  const i = Object.assign(I(r, e), {
+  const i = Object.assign(F(r, e), {
     component: r,
     cssClass: r,
     componentProps: e
@@ -294,13 +294,13 @@ async function S(r, e, t) {
 function v(r) {
   r.key === "Escape" && r.preventDefault();
 }
-function I(r, e) {
+function F(r, e) {
   let t = document.createElement("dialog"), n = "";
   return e !== void 0 && Object.keys(e).forEach((i) => {
     n += ` data-${i}="${e[i]}"`;
   }), h.instance.configs.components.find((i) => i.name === r).presenterClassName && (n += ` data-presenter="${r}"`), n === "" ? t.innerHTML = `<${r}/>` : t.innerHTML = `<${r}${n}/>`, t.classList.add("modal", `${r}-dialog`), t;
 }
-function U(r, e) {
+function H(r, e) {
   const t = g(r, "dialog");
   if (e !== void 0) {
     let n = new Event("close", {
@@ -314,7 +314,7 @@ function U(r, e) {
 function C(r, e) {
   document.removeEventListener("click", r.clickHandler), r.remove(), e !== void 0 && delete e.actionBox;
 }
-async function D(r, e, t, n, o = {}) {
+async function I(r, e, t, n, o = {}) {
   if (r.parentNode.querySelector(t))
     return null;
   const s = document.createElement(`${t}`);
@@ -356,7 +356,7 @@ async function D(r, e, t, n, o = {}) {
   };
   return s.clickHandler = l, document.addEventListener("click", l), s;
 }
-async function F(r, e, t = !1) {
+async function D(r, e, t = !1) {
   typeof e == "boolean" && (t = e, e = void 0);
   const n = document.querySelector("body"), o = g(n, "dialog");
   o && (o.close(), o.remove());
@@ -392,10 +392,10 @@ async function F(r, e, t = !1) {
 }
 const B = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  closeModal: U,
-  createReactiveModal: F,
+  closeModal: H,
+  createReactiveModal: D,
   removeActionBox: C,
-  showActionBox: D,
+  showActionBox: I,
   showModal: S
 }, Symbol.toStringTag, { value: "Module" }));
 function k(r) {
@@ -547,7 +547,7 @@ class h {
     try {
       this.validateTagName(e);
     } catch (a) {
-      await window.showApplicationError(a, a, a), console.error(a);
+      await window.showApplicationError(`Failed to navigate to ${e} with Url ${t}`, a.message, a.stack.toString()), console.error(a);
       return;
     }
     const i = this.showLoading();
@@ -601,7 +601,7 @@ class h {
     try {
       this.preventExternalResources(e);
     } catch (t) {
-      await window.showApplicationError(t, t, t), console.error(t);
+      await window.showApplicationError("UpdateAppContent", t.message, t.stack.toString()), console.error(t);
       return;
     }
     this._appContent.innerHTML = e;
@@ -822,7 +822,7 @@ class h {
 export {
   L as ResourceManager,
   h as WebSkel,
-  U as closeModal,
+  H as closeModal,
   x as createTemplateArray,
   T as customTrim,
   h as default,
@@ -836,14 +836,14 @@ export {
   X as getURLParams,
   P as imageUpload,
   j as invalidateParentElement,
-  R as moveCursorToEnd,
+  $ as moveCursorToEnd,
   M as normalizeSpaces,
   A as notBasePage,
   E as refreshElement,
   C as removeActionBox,
   w as reverseQuerySelector,
   y as sanitize,
-  D as showActionBox,
+  I as showActionBox,
   S as showModal,
-  $ as unsanitize
+  R as unsanitize
 };
