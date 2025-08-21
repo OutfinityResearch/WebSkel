@@ -33,6 +33,7 @@ class WebSkel {
             return WebSkel.instance;
         }
         let webSkel = new WebSkel();
+        window.webSkel = webSkel;
         const utilModules = [
             domUtils,
             formUtils,
