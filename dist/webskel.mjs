@@ -494,6 +494,7 @@ class h {
     if (h.instance)
       return h.instance;
     let t = new h();
+    window.webSkel = t;
     const n = [
       N,
       V,
