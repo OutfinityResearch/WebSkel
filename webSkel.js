@@ -27,7 +27,9 @@ class WebSkel {
         }
         console.log("creating new app manager instance");
     }
-
+    async reinit(configsPath){
+        await WebSkel.instance.loadConfigs(configsPath);
+    }
     static async initialise(configsPath) {
         if (WebSkel.instance) {
             return WebSkel.instance;
